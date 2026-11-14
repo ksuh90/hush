@@ -10,8 +10,8 @@ android {
         applicationId = "app.hush"
         minSdk = 33
         targetSdk = 33
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.1.1"
         ndk { abiFilters += "arm64-v8a" }
     }
 
@@ -47,7 +47,25 @@ android {
     }
 }
 
+androidComponents {
+    onVariants { variant ->
+        // AGP leaves out v1 (JAR) signing when minSdk is 24 or more. The Samsung installer
+        // can refuse an APK without it ("App not installed"), so sign with all schemes.
+        variant.signingConfig.enableV1Signing.set(true)
+        variant.signingConfig.enableV2Signing.set(true)
+        variant.signingConfig.enableV3Signing.set(true)
+    }
+}
+
 dependencies {
     implementation("com.k2fsa.sherpa.onnx:sherpa-onnx-static-link-onnxruntime:2.0.1@aar")
     testImplementation("junit:junit:4.13.2")
+}
+
+// Checks the release APK that is installed by hand. Run: ./gradlew checkReleaseApk
+tasks.register<Exec>("checkReleaseApk") {
+    dependsOn("assembleRelease")
+    val tools = androidComponents.sdkComponents.sdkDirectory.get().dir("build-tools/${android.buildToolsVersion}")
+    val apk = layout.buildDirectory.file("outputs/apk/release/app-release.apk").get()
+    commandLine(layout.projectDirectory.file("../scripts/check-apk.sh").asFile, tools.asFile, apk.asFile)
 }

@@ -15,16 +15,16 @@ You need the JDK that comes with Android Studio and the Android SDK.
 ```sh
 export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 export ANDROID_HOME="$HOME/Library/Android/sdk"
-./gradlew testDebugUnitTest lintRelease assembleRelease
+./gradlew testDebugUnitTest lintRelease checkReleaseApk
 ```
 
-The APK is `app/build/outputs/apk/release/app-release.apk`. The debug key signs it, because Hush is not on Google Play.
+The APK is `app/build/outputs/apk/release/app-release.apk`. The debug key signs it, because Hush is not on Google Play. `checkReleaseApk` runs `scripts/check-apk.sh`. It makes sure that the APK has the v1, v2 and v3 signatures, 16 KB zip alignment, minSdk 33 and arm64-v8a code only. The Samsung installer refuses an APK without the v1 signature ("App not installed").
 
 ## Install
 
 1. Copy the APK to the phone and open it, or run `adb install -r app-release.apk`.
 2. Open Hush and do the steps on the screen: microphone, language and model, accessibility service, battery.
-3. If Android shows "Restricted setting" for the accessibility service, open app info, tap ⋮, tap "Allow restricted settings", and try again.
+3. If Android shows "Restricted setting" for the accessibility service, open Settings > Apps > Hush, tap ⋮, tap "Allow restricted settings", and try again. Do not open app info from Hush: then Android does not show this menu item.
 
 ## How it works
 

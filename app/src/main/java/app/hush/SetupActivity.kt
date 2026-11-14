@@ -32,7 +32,8 @@ class SetupActivity : Activity() {
             requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.POST_NOTIFICATIONS), 1)
         }
         button(R.id.a11yButton).setOnClickListener { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
-        button(R.id.appInfoButton).setOnClickListener { openAppInfo() }
+        // Android hides "Allow restricted settings" when Hush itself opens its app info.
+        button(R.id.appsButton).setOnClickListener { startActivity(Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS)) }
         button(R.id.batteryButton).setOnClickListener { openAppInfo() }
         val group = findViewById<RadioGroup>(R.id.languageGroup)
         for (language in Catalog.languages) {

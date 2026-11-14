@@ -33,8 +33,9 @@
     <string name="action_delete_model">Delete model</string>
     <string name="action_open_accessibility">Open accessibility</string>
     <string name="action_app_info">Open app info</string>
+    <string name="action_open_apps">Open apps</string>
 
-    <string name="accessibility_hint">Go to Installed apps &gt; Hush voice typing and turn it on. If Android shows \"Restricted setting\", open app info, tap ⋮ (top right), tap \"Allow restricted settings\", and try again.</string>
+    <string name="accessibility_hint">Go to Installed apps &gt; Hush voice typing and turn it on. If Android shows \"Restricted setting\": tap \"Open apps\", tap Hush, tap ⋮ (top right), tap \"Allow restricted settings\", and try again. The ⋮ menu does not show when you open app info from Hush.</string>
     <string name="battery_hint">In app info, set Battery to Unrestricted. Then go to Settings &gt; Battery &gt; Background usage limits and add Hush to \"Never sleeping apps\".</string>
     <string name="try_hint">Tap here. The mic button shows above the keyboard.</string>
 
