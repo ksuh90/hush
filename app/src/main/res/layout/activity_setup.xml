@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="24dp">
+
+        <TextView
+            style="@style/Hush.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name" />
+
+        <TextView
+            style="@style/Hush.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/setup_intro" />
+
+        <TextView
+            style="@style/Hush.Step"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/step_mic" />
+
+        <TextView
+            android:id="@+id/micStatus"
+            style="@style/Hush.Status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/micButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_allow" />
+
+        <LinearLayout
+            android:id="@+id/modelSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/Hush.Step"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/step_language" />
+
+            <RadioGroup
+                android:id="@+id/languageGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/modelStatus"
+                style="@style/Hush.Status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <ProgressBar
+                android:id="@+id/modelProgress"
+                style="@android:style/Widget.DeviceDefault.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="1000"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/modelButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/Hush.Step"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/step_accessibility" />
+
+        <TextView
+            android:id="@+id/a11yStatus"
+            style="@style/Hush.Status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            style="@style/Hush.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/accessibility_hint" />
+
+        <Button
+            android:id="@+id/a11yButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_open_accessibility" />
+
+        <Button
+            android:id="@+id/appInfoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_app_info" />
+
+        <TextView
+            style="@style/Hush.Step"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/step_battery" />
+
+        <TextView
+            android:id="@+id/batteryStatus"
+            style="@style/Hush.Status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            style="@style/Hush.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/battery_hint" />
+
+        <Button
+            android:id="@+id/batteryButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_app_info" />
+
+        <TextView
+            style="@style/Hush.Step"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/step_try" />
+
+        <EditText
+            android:id="@+id/testField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/try_hint"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine|textCapSentences"
+            android:minLines="3" />
+
+        <TextView
+            style="@style/Hush.Step"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/step_diagnostics" />
+
+        <TextView
+            android:id="@+id/diagnostics"
+            style="@style/Hush.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:textIsSelectable="true" />
+    </LinearLayout>
+</ScrollView>

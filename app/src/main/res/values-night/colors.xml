@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bubble_idle">#E63C4043</color>
+    <color name="brand">#FF8C9EFF</color>
+    <color name="ok">#FF81C995</color>
+    <color name="todo">#FFF28B82</color>
+</resources>

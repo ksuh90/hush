@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hush</string>
+    <string name="service_label">Hush voice typing</string>
+    <string name="service_summary">Shows a mic button on text fields. Speech stays on this phone.</string>
+    <string name="service_description">Hush shows a small mic button when you edit a text field. Tap the mic and speak. Tap the check mark to put the text at the cursor, or tap X to stop. Hush finds the focused text field and types the text into it. Speech recognition runs on this phone. Hush does not send audio or text to a server.</string>
+
+    <string name="setup_intro">Private voice typing. Speech recognition runs on this phone. Do the steps below one time.</string>
+    <string name="step_mic">1. Microphone</string>
+    <string name="step_language">2. Language and speech model</string>
+    <string name="step_accessibility">3. Accessibility service</string>
+    <string name="step_battery">4. Battery</string>
+    <string name="step_try">5. Try it</string>
+    <string name="step_diagnostics">Diagnostics</string>
+
+    <string name="status_mic_on">Allowed</string>
+    <string name="status_mic_off">Not allowed</string>
+    <string name="status_service_on">On</string>
+    <string name="status_service_off">Off</string>
+    <string name="status_battery_on">Unrestricted</string>
+    <string name="status_battery_off">Optimized. Android can stop Hush.</string>
+
+    <string name="action_allow">Allow</string>
+    <string name="action_open_accessibility">Open accessibility</string>
+    <string name="action_app_info">Open app info</string>
+
+    <string name="accessibility_hint">Go to Installed apps &gt; Hush voice typing and turn it on. If Android shows \"Restricted setting\", open app info, tap ⋮ (top right), tap \"Allow restricted settings\", and try again.</string>
+    <string name="battery_hint">In app info, set Battery to Unrestricted. Then go to Settings &gt; Battery &gt; Background usage limits and add Hush to \"Never sleeping apps\".</string>
+    <string name="try_hint">Tap here. The mic button shows above the keyboard.</string>
+
+    <string name="channel_recording">Recording</string>
+    <string name="notification_listening">Hush is listening</string>
+
+    <string name="bubble_start">Start voice typing</string>
+    <string name="bubble_stop">Stop and type the text</string>
+    <string name="bubble_cancel">Cancel voice typing</string>
+    <string name="bubble_confirm">Type the text</string>
+
+    <string name="notice_no_model">Download the speech model in Hush first.</string>
+    <string name="notice_no_speech">Hush heard no speech.</string>
+    <string name="notice_mic_failed">Hush cannot start the microphone.</string>
+    <string name="notice_mic_silent">The microphone gave no sound. Another app can use it, or Android blocks it.</string>
+    <string name="notice_engine_failed">Hush cannot use the speech model. Download it again.</string>
+    <string name="notice_copied">Hush cannot type in this field. The text is on the clipboard. Paste it.</string>
+
+    <string name="diag_none">No data yet.</string>
+</resources>
