@@ -19,7 +19,13 @@ data class ModelSpec(
 }
 
 /** A dictation language. [modelLanguage] is the code that a multilingual model gets. */
-data class Language(val code: String, val label: String, val model: ModelSpec, val modelLanguage: String = code)
+data class Language(
+    val code: String,
+    val label: String,
+    val note: String,
+    val model: ModelSpec,
+    val modelLanguage: String = code,
+)
 
 object Catalog {
     val vad = ModelFile(
@@ -73,8 +79,8 @@ object Catalog {
     )
 
     val languages = listOf(
-        Language("en", "English", moonshineBaseEn),
-        Language("ko", "한국어 (Korean)", whisperBase),
+        Language("en", "English", "Moonshine Base, fast", moonshineBaseEn),
+        Language("ko", "한국어 (Korean)", "Whisper Base, slower, basic accuracy", whisperBase),
     )
 
     fun language(code: String): Language = languages.firstOrNull { it.code == code } ?: languages.first()

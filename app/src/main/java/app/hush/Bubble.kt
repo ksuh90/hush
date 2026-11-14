@@ -43,6 +43,7 @@ class Bubble(
 
     private var attached = false
     private var expanded = false
+    private var confirmShown = false
     private var keyboardTop: Int? = null
     private var dragAnchor: Pair<Int, Int>? = null
 
@@ -68,6 +69,7 @@ class Bubble(
         val recording = state is State.Recording
         val transcribing = state is State.Transcribing
         expanded = recording || transcribing
+        confirmShown = recording
         cancel.visibility = if (expanded) View.VISIBLE else View.GONE
         confirm.visibility = if (recording) View.VISIBLE else View.GONE
         progress.visibility = if (transcribing) View.VISIBLE else View.GONE
@@ -104,7 +106,8 @@ class Bubble(
         dragAnchor?.let { return it }
         prefs.bubbleAnchor?.let { return clamp(it) }
         val bounds = windowManager.currentWindowMetrics.bounds
-        val x = bounds.width() - dp(EDGE + PAD) - dp(MIC) / 2
+        // Leave space for the check button, so that the mic does not move when recording starts.
+        val x = bounds.width() - dp(EDGE + SIDE + GAP) - dp(MIC) / 2
         val bottom = keyboardTop ?: (bounds.height() * 0.6f).roundToInt()
         return clamp(x to bottom - dp(EDGE + PAD) - dp(MIC) / 2)
     }
@@ -115,11 +118,18 @@ class Bubble(
         return point.first.coerceIn(half, bounds.width() - half) to point.second.coerceIn(half, bounds.height() - half)
     }
 
-    /** Puts the window so that the mic center stays on the anchor when the buttons show. */
+    /**
+     * Puts the window so that the mic center stays on the anchor when the buttons show.
+     * Near a screen edge, the window moves to keep all buttons on the screen.
+     */
     private fun place() {
         val (x, y) = anchor()
-        val left = dp(PAD) + (if (expanded) dp(SIDE) + dp(GAP) else 0) + dp(MIC) / 2
-        params.x = x - left
+        val side = dp(SIDE) + dp(GAP)
+        val left = dp(PAD) + (if (expanded) side else 0) + dp(MIC) / 2
+        val width = 2 * dp(PAD) + dp(MIC) + (if (expanded) side else 0) + (if (confirmShown) side else 0)
+        val screenWidth = windowManager.currentWindowMetrics.bounds.width()
+        val margin = dp(EDGE - PAD)
+        params.x = (x - left).coerceIn(margin, maxOf(margin, screenWidth - width - margin))
         params.y = y - dp(PAD) - dp(MIC) / 2
     }
 

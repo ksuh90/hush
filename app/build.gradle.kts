@@ -25,6 +25,11 @@ android {
         }
     }
 
+    packaging {
+        // The sherpa-onnx libraries come stripped. This stops a warning when no NDK is installed.
+        jniLibs.keepDebugSymbols += "**/*.so"
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -43,5 +48,6 @@ android {
 }
 
 dependencies {
+    implementation("com.k2fsa.sherpa.onnx:sherpa-onnx-static-link-onnxruntime:2.0.1@aar")
     testImplementation("junit:junit:4.13.2")
 }

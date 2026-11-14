@@ -20,7 +20,17 @@
     <string name="status_battery_on">Unrestricted</string>
     <string name="status_battery_off">Optimized. Android can stop Hush.</string>
 
+    <string name="status_model_ready">Ready</string>
+    <string name="status_model_missing">Not downloaded</string>
+    <string name="model_hint">Hush downloads the model one time. After that, Hush uses no network.</string>
+    <string name="status_model_downloading">Downloading: %1$d%% of %2$d MB</string>
+    <string name="status_model_failed">Download stopped: %1$s. Tap Download to continue.</string>
+    <string name="language_option">%1$s\n%2$s, %3$d MB</string>
+
     <string name="action_allow">Allow</string>
+    <string name="action_download">Download (%1$d MB)</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete_model">Delete model</string>
     <string name="action_open_accessibility">Open accessibility</string>
     <string name="action_app_info">Open app info</string>
 

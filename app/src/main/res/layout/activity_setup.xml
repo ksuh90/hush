@@ -59,6 +59,12 @@
                 android:layout_height="wrap_content" />
 
             <TextView
+                style="@style/Hush.Body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/model_hint" />
+
+            <TextView
                 android:id="@+id/modelStatus"
                 style="@style/Hush.Status"
                 android:layout_width="match_parent"

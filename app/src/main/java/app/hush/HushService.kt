@@ -1,6 +1,7 @@
 package app.hush
 
 import android.accessibilityservice.AccessibilityService
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
@@ -151,6 +152,9 @@ class HushService : AccessibilityService(), Recorder.Listener {
     }
 
     private fun notify(notice: Notice) {
+        if (notice == Notice.NO_MODEL) {
+            startActivity(Intent(this, SetupActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
         toast(
             when (notice) {
                 Notice.NO_MODEL -> R.string.notice_no_model

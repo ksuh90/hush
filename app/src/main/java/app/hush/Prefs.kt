@@ -27,6 +27,12 @@ class Prefs(context: Context) {
     }
 
     fun noteOf(key: String): String? = prefs.getString(key, null)
+
+    fun listen(listener: SharedPreferences.OnSharedPreferenceChangeListener) =
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+
+    fun unlisten(listener: SharedPreferences.OnSharedPreferenceChangeListener) =
+        prefs.unregisterOnSharedPreferenceChangeListener(listener)
 }
 
 /** Last results that the setup screen shows, so the user can report them. */

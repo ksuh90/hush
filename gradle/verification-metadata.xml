@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<verification-metadata xmlns="https://schema.gradle.org/dependency-verification"
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xsi:schemaLocation="https://schema.gradle.org/dependency-verification https://schema.gradle.org/dependency-verification/dependency-verification-1.3.xsd">
+   <configuration>
+      <verify-metadata>true</verify-metadata>
+      <verify-signatures>false</verify-signatures>
+      <trusted-artifacts>
+         <!-- Only the sherpa-onnx AAR comes from outside a Maven repository, so only it is pinned. -->
+         <trust group="^(?!com[.]k2fsa[.]sherpa[.]onnx$).*$" regex="true"/>
+      </trusted-artifacts>
+   </configuration>
+   <components>
+      <component group="com.k2fsa.sherpa.onnx" name="sherpa-onnx-static-link-onnxruntime" version="2.0.1">
+         <artifact name="sherpa-onnx-static-link-onnxruntime-2.0.1.aar">
+            <sha256 value="07e042d97f3a6bd5b7fe74d4eef0513dc01a714b16c15a903250095aba43a575" origin="https://github.com/k2-fsa/sherpa-onnx/releases/tag/v2.0.1"/>
+         </artifact>
+      </component>
+   </components>
+</verification-metadata>
