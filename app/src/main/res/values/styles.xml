@@ -52,6 +52,14 @@
         <item name="android:lineHeight">19sp</item>
     </style>
 
+    <!-- The privacy lines under About: body color, so they read as facts, not as a hint. -->
+    <style name="Hush.About" parent="Hush.Text">
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineHeight">21sp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:breakStrategy">balanced</item>
+    </style>
+
     <style name="Hush.Strong" parent="Hush.Text">
         <item name="android:textFontWeight">600</item>
     </style>

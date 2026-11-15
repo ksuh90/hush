@@ -51,7 +51,9 @@
     <string name="diagnostics_summary">Microphone, engine and typing notes</string>
     <string name="diagnostics_hint">The last results of the microphone, the speech engine and typing. Send them when you report a problem.</string>
     <string name="about_version">Hush %1$s</string>
-    <string name="about_summary">Speech stays on this phone. After the model download, Hush uses no network.</string>
+    <string name="about_on_phone">Everything happens on this phone. Hush sends no audio and no text.</string>
+    <string name="about_keeps">Hush keeps no recordings and no text. If an app blocks typing, the text goes to the clipboard.</string>
+    <string name="about_internet">Hush uses the internet only to download the speech model.</string>
 
     <string name="channel_recording">Recording</string>
     <string name="notification_listening">Hush is listening</string>

@@ -165,11 +165,23 @@
                     android:layout_height="wrap_content" />
 
                 <TextView
-                    android:id="@+id/aboutSummary"
-                    style="@style/Hush.Small"
+                    style="@style/Hush.About"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp" />
+                    android:layout_marginTop="6dp"
+                    android:text="@string/about_on_phone" />
+
+                <TextView
+                    style="@style/Hush.About"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/about_keeps" />
+
+                <TextView
+                    style="@style/Hush.About"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/about_internet" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

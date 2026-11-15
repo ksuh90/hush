@@ -25,7 +25,6 @@ class SettingsActivity : Activity() {
         findViewById<View>(R.id.diagnosticsRow).setOnClickListener { startActivity(Intent(this, DiagnosticsActivity::class.java)) }
         text(R.id.diagnosticsSummary, getString(R.string.diagnostics_summary))
         text(R.id.aboutTitle, getString(R.string.about_version, packageManager.getPackageInfo(packageName, 0).versionName))
-        text(R.id.aboutSummary, getString(R.string.about_summary))
     }
 
     override fun onResume() {
