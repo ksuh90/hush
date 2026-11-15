@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bubble_idle">#E63C4043</color>
-    <color name="brand">#FF8C9EFF</color>
-    <color name="ok">#FF81C995</color>
-    <color name="todo">#FFF28B82</color>
+    <color name="bg">#FF0F1A3A</color>
+    <color name="fg">#FFFFF1DC</color>
+    <color name="mute">#FFAEB6D3</color>
+    <color name="card">#FF1A2652</color>
+    <color name="line">#FF26325F</color>
+    <color name="field">#FF6B76A0</color>
+    <color name="btn">#FFFFC23D</color>
+    <color name="btn_fg">#FF0F1A3A</color>
+    <color name="seg">#FFFFC23D</color>
+    <color name="trk">#FF26325F</color>
+    <color name="disc">#FF1A2652</color>
+    <color name="link">#FFFFC23D</color>
+    <color name="danger">#FFFFB4AB</color>
+    <color name="ripple">#29FFF1DC</color>
 </resources>

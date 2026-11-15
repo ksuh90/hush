@@ -36,7 +36,7 @@ class MicService : Service() {
             NotificationChannel(CHANNEL, getString(R.string.channel_recording), NotificationManager.IMPORTANCE_LOW),
         )
         return Notification.Builder(this, CHANNEL)
-            .setSmallIcon(R.drawable.ic_mic)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(getString(R.string.notification_listening))
             .setOngoing(true)
             .build()

@@ -2,9 +2,9 @@ package app.hush
 
 import android.content.Context
 import com.k2fsa.sherpa.onnx.OfflineModelConfig
-import com.k2fsa.sherpa.onnx.OfflineMoonshineModelConfig
 import com.k2fsa.sherpa.onnx.OfflineRecognizer
 import com.k2fsa.sherpa.onnx.OfflineRecognizerConfig
+import com.k2fsa.sherpa.onnx.OfflineTransducerModelConfig
 import com.k2fsa.sherpa.onnx.OfflineWhisperModelConfig
 import com.k2fsa.sherpa.onnx.SileroVadModelConfig
 import com.k2fsa.sherpa.onnx.Vad
@@ -19,15 +19,22 @@ class Engine(context: Context) {
 
     fun isReady(language: Language) = store.isReady(language.model)
 
+    private var loadMs: Long? = null
+
     fun prepare(language: Language) {
         val key = "${language.model.id}/${language.modelLanguage}"
         if (key == loaded) return
         release()
         check(isReady(language)) { "model ${language.model.id} is not downloaded" }
+        val start = System.nanoTime()
         recognizer = OfflineRecognizer(config = OfflineRecognizerConfig(modelConfig = modelConfig(language)))
         vad = Vad(config = vadConfig(language.model))
         loaded = key
+        loadMs = (System.nanoTime() - start) / 1_000_000
     }
+
+    /** Returns the time of the last model load, one time, or null when no load happened since the last call. */
+    fun takeLoadMs(): Long? = loadMs.also { loadMs = null }
 
     fun transcribe(language: Language, samples: FloatArray): String {
         prepare(language)
@@ -80,13 +87,15 @@ class Engine(context: Context) {
         val spec = language.model
         val tokens = path(spec, spec.tokens)
         return when (spec.family) {
-            Family.MOONSHINE -> OfflineModelConfig(
-                moonshine = OfflineMoonshineModelConfig(
+            Family.TRANSDUCER -> OfflineModelConfig(
+                transducer = OfflineTransducerModelConfig(
                     encoder = path(spec, spec.encoder),
-                    mergedDecoder = path(spec, spec.decoder),
+                    decoder = path(spec, spec.decoder),
+                    joiner = path(spec, checkNotNull(spec.joiner)),
                 ),
                 tokens = tokens,
                 numThreads = THREADS,
+                modelType = "nemo_transducer",
             )
             Family.WHISPER -> OfflineModelConfig(
                 whisper = OfflineWhisperModelConfig(

@@ -1,59 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- The ghost is 48 dp in an 80 dp frame for the voice ring. X and the check are 44 dp circles in 48 dp touch areas, 60 dp from the ghost center. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="6dp">
 
     <ImageButton
         android:id="@+id/cancel"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:layout_marginEnd="10dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="-4dp"
         android:background="@drawable/bubble_cancel"
         android:contentDescription="@string/bubble_cancel"
         android:elevation="3dp"
-        android:src="@drawable/ic_close"
+        android:src="@drawable/ic_x"
         android:visibility="gone" />
 
     <FrameLayout
-        android:layout_width="56dp"
-        android:layout_height="56dp">
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:clipChildren="false">
 
-        <View
-            android:id="@+id/halo"
+        <app.hush.VoiceRing
+            android:id="@+id/ring"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/bubble_halo"
-            android:visibility="gone" />
+            android:importantForAccessibility="no" />
 
         <ImageButton
             android:id="@+id/mic"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="center"
-            android:background="@drawable/bubble_mic_idle"
+            android:background="@drawable/bubble_ghost"
             android:contentDescription="@string/bubble_start"
             android:elevation="3dp"
-            android:src="@drawable/ic_mic" />
-
-        <ProgressBar
-            android:id="@+id/progress"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
-            android:elevation="4dp"
-            android:indeterminate="true"
-            android:indeterminateTint="@color/on_bubble"
-            android:visibility="gone" />
+            android:scaleType="center"
+            android:src="@drawable/ghost_plain" />
     </FrameLayout>
 
     <ImageButton
         android:id="@+id/confirm"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:layout_marginStart="10dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="-4dp"
         android:background="@drawable/bubble_confirm"
         android:contentDescription="@string/bubble_confirm"
         android:elevation="3dp"

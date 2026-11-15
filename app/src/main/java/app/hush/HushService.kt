@@ -30,6 +30,7 @@ class HushService : AccessibilityService(), Recorder.Listener {
         worker = Executors.newSingleThreadExecutor()
         bubble = Bubble(this, prefs, ::onAction)
         Recorder.listener = this
+        worker.execute { ModelStore.of(this).prune(Catalog.models) }
         refresh()
     }
 
@@ -129,7 +130,10 @@ class HushService : AccessibilityService(), Recorder.Listener {
                         val start = System.nanoTime()
                         val text = engine.transcribe(language, samples)
                         val ms = (System.nanoTime() - start) / 1_000_000
-                        Diagnostics.engine(this, "%s: %.1f s audio in %d ms".format(language.model.id, seconds, ms))
+                        val load = engine.takeLoadMs()?.let { ", model load %d ms".format(it) } ?: ""
+                        val note = "%s: %.1f s audio in %d ms%s".format(language.model.id, seconds, ms, load)
+                        Log.i(TAG, "engine: $note")
+                        Diagnostics.engine(this, note)
                         Event.Transcribed(session, text)
                     } catch (e: Exception) {
                         Log.w(TAG, "transcribe failed", e)
@@ -169,7 +173,7 @@ class HushService : AccessibilityService(), Recorder.Listener {
     private fun toast(message: Int) = Toast.makeText(this, message, Toast.LENGTH_LONG).show()
 
     override fun onLevel(level: Float) {
-        if (machine.state is State.Recording) bubble.setLevel(level)
+        if (machine.state is State.Recording) bubble.setRms(level)
     }
 
     override fun onRecordFailed(session: Int, notice: Notice) = dispatch(Event.Failed(session, notice))

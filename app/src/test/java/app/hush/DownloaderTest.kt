@@ -97,7 +97,7 @@ class DownloaderTest {
     @Test
     fun storeIsReadyOnlyWithAllFiles() {
         val store = ModelStore(temp.root)
-        val spec = Catalog.moonshineBaseEn
+        val spec = Catalog.parakeetV2
         assertFalse(store.isReady(spec))
         assertEquals(spec.bytes + Catalog.vad.bytes, store.missingBytes(spec))
         for ((file, place) in store.parts(spec)) {
@@ -108,5 +108,18 @@ class DownloaderTest {
         store.delete(spec)
         assertFalse(store.isReady(spec))
         assertEquals(spec.bytes, store.missingBytes(spec))
+    }
+
+    @Test
+    fun pruneKeepsOnlyCatalogModels() {
+        val store = ModelStore(temp.root)
+        val old = File(temp.root, "moonshine-base-en-quantized-2026-02-27").apply { mkdirs() }
+        File(old, "encoder_model.ort").writeText("x")
+        val kept = store.file(Catalog.parakeetV2, Catalog.parakeetV2.tokens).apply { parentFile!!.mkdirs(); writeText("x") }
+        store.vadFile().writeText("x")
+        store.prune(Catalog.languages.map { it.model })
+        assertFalse(old.exists())
+        assertTrue(kept.exists())
+        assertTrue(store.vadFile().exists())
     }
 }

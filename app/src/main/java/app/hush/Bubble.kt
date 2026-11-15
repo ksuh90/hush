@@ -13,7 +13,7 @@ import android.widget.ImageButton
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-/** The floating mic window. It uses TYPE_ACCESSIBILITY_OVERLAY and never takes input focus. */
+/** The floating ghost window. It uses TYPE_ACCESSIBILITY_OVERLAY and never takes input focus. */
 class Bubble(
     private val context: Context,
     private val prefs: Prefs,
@@ -29,8 +29,7 @@ class Bubble(
     private val cancel: ImageButton = root.findViewById(R.id.cancel)
     private val confirm: ImageButton = root.findViewById(R.id.confirm)
     private val mic: ImageButton = root.findViewById(R.id.mic)
-    private val halo: View = root.findViewById(R.id.halo)
-    private val progress: View = root.findViewById(R.id.progress)
+    private val ring: VoiceRing = root.findViewById(R.id.ring)
     private val params = WindowManager.LayoutParams(
         WindowManager.LayoutParams.WRAP_CONTENT,
         WindowManager.LayoutParams.WRAP_CONTENT,
@@ -72,12 +71,12 @@ class Bubble(
         confirmShown = recording
         cancel.visibility = if (expanded) View.VISIBLE else View.GONE
         confirm.visibility = if (recording) View.VISIBLE else View.GONE
-        progress.visibility = if (transcribing) View.VISIBLE else View.GONE
-        halo.visibility = if (recording) View.VISIBLE else View.GONE
-        mic.setBackgroundResource(if (recording) R.drawable.bubble_mic_recording else R.drawable.bubble_mic_idle)
-        mic.imageAlpha = if (transcribing) 0 else 255
+        ring.mode = when {
+            recording -> VoiceRing.Mode.LISTENING
+            transcribing -> VoiceRing.Mode.BUSY
+            else -> VoiceRing.Mode.OFF
+        }
         mic.contentDescription = context.getString(if (recording) R.string.bubble_stop else R.string.bubble_start)
-        if (!recording) setLevel(0f)
         place()
         if (attached) {
             windowManager.updateViewLayout(root, params)
@@ -87,11 +86,7 @@ class Bubble(
         }
     }
 
-    fun setLevel(level: Float) {
-        val scale = 0.8f + (level * 8f).coerceIn(0f, 1f) * 0.2f
-        halo.scaleX = scale
-        halo.scaleY = scale
-    }
+    fun setRms(rms: Float) = ring.setRms(rms)
 
     fun remove() {
         if (attached) {
@@ -106,31 +101,31 @@ class Bubble(
         dragAnchor?.let { return it }
         prefs.bubbleAnchor?.let { return clamp(it) }
         val bounds = windowManager.currentWindowMetrics.bounds
-        // Leave space for the check button, so that the mic does not move when recording starts.
-        val x = bounds.width() - dp(EDGE + SIDE + GAP) - dp(MIC) / 2
+        // Leave space for the check button, so that the ghost does not move when recording starts.
+        val x = bounds.width() - dp(EDGE + SPAN) - dp(FRAME) / 2
         val bottom = keyboardTop ?: (bounds.height() * 0.6f).roundToInt()
-        return clamp(x to bottom - dp(EDGE + PAD) - dp(MIC) / 2)
+        return clamp(x to bottom - dp(KEYBOARD_GAP) - dp(GHOST) / 2)
     }
 
     private fun clamp(point: Pair<Int, Int>): Pair<Int, Int> {
         val bounds = windowManager.currentWindowMetrics.bounds
-        val half = dp(MIC) / 2 + dp(PAD)
+        val half = dp(FRAME) / 2 + dp(PAD)
         return point.first.coerceIn(half, bounds.width() - half) to point.second.coerceIn(half, bounds.height() - half)
     }
 
     /**
-     * Puts the window so that the mic center stays on the anchor when the buttons show.
+     * Puts the window so that the ghost center stays on the anchor when the buttons show.
      * Near a screen edge, the window moves to keep all buttons on the screen.
      */
     private fun place() {
         val (x, y) = anchor()
-        val side = dp(SIDE) + dp(GAP)
-        val left = dp(PAD) + (if (expanded) side else 0) + dp(MIC) / 2
-        val width = 2 * dp(PAD) + dp(MIC) + (if (expanded) side else 0) + (if (confirmShown) side else 0)
+        val side = dp(SPAN)
+        val left = dp(PAD) + (if (expanded) side else 0) + dp(FRAME) / 2
+        val width = 2 * dp(PAD) + dp(FRAME) + (if (expanded) side else 0) + (if (confirmShown) side else 0)
         val screenWidth = windowManager.currentWindowMetrics.bounds.width()
         val margin = dp(EDGE - PAD)
         params.x = (x - left).coerceIn(margin, maxOf(margin, screenWidth - width - margin))
-        params.y = y - dp(PAD) - dp(MIC) / 2
+        params.y = y - dp(PAD) - dp(FRAME) / 2
     }
 
     private inner class DragListener : View.OnTouchListener {
@@ -182,10 +177,13 @@ class Bubble(
     }
 
     private companion object {
-        const val MIC = 56
-        const val SIDE = 44
-        const val GAP = 10
+        // Sizes in dp. They agree with bubble.xml.
+        const val FRAME = 80
+        const val GHOST = 48
+        // From the frame edge to the outer edge of the touch area of X or the check.
+        const val SPAN = 44
         const val PAD = 6
-        const val EDGE = 12
+        const val EDGE = 10
+        const val KEYBOARD_GAP = 22
     }
 }

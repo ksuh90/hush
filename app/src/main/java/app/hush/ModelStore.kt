@@ -27,6 +27,12 @@ class ModelStore(private val root: File) {
         File(root, spec.id).deleteRecursively()
     }
 
+    /** Deletes the folders of models that are not in [keep], for example a model that an update replaced. */
+    fun prune(keep: Collection<ModelSpec>) {
+        val ids = keep.map { it.id }.toSet()
+        root.listFiles()?.filter { it.isDirectory && it.name !in ids }?.forEach { it.deleteRecursively() }
+    }
+
     companion object {
         fun totalBytes(spec: ModelSpec) = spec.bytes + Catalog.vad.bytes
 

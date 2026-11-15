@@ -12,6 +12,11 @@ class Prefs(context: Context) {
         get() = prefs.getString("language", null) ?: Catalog.languages.first().code
         set(value) = prefs.edit().putString("language", value).apply()
 
+    /** True after Hush asked for the microphone one time. Then Android can stop showing the request. */
+    var micAsked: Boolean
+        get() = prefs.getBoolean("mic_asked", false)
+        set(value) = prefs.edit().putBoolean("mic_asked", value).apply()
+
     /** Bubble center in screen pixels, or null when the user did not move it. */
     var bubbleAnchor: Pair<Int, Int>?
         get() {
@@ -35,7 +40,7 @@ class Prefs(context: Context) {
         prefs.unregisterOnSharedPreferenceChangeListener(listener)
 }
 
-/** Last results that the setup screen shows, so the user can report them. */
+/** Last results that the Diagnostics screen shows, so the user can report them. */
 object Diagnostics {
     const val MIC = "diag_mic"
     const val INSERT = "diag_insert"

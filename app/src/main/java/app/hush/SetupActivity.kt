@@ -1,26 +1,44 @@
 package app.hush
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.Typeface
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.AbsoluteSizeSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.TypefaceSpan
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.view.accessibility.AccessibilityManager
 import android.widget.Button
+import android.widget.ImageButton
+import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
+import kotlin.math.roundToInt
 
+/** Shows one setup step at a time, then the ready screen. With [EXTRA_LANGUAGE_PAGE] it shows only the language choice. */
 class SetupActivity : Activity() {
     private lateinit var prefs: Prefs
+    private lateinit var store: ModelStore
+    private val languagePage by lazy { intent.getBooleanExtra(EXTRA_LANGUAGE_PAGE, false) }
+    private var step = SetupStep.MIC
     private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> refresh() }
     private val serviceListener = AccessibilityManager.AccessibilityServicesStateChangeListener { refresh() }
 
@@ -28,27 +46,15 @@ class SetupActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setup)
         prefs = Prefs(this)
-        button(R.id.micButton).setOnClickListener {
-            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.POST_NOTIFICATIONS), 1)
-        }
-        button(R.id.a11yButton).setOnClickListener { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
-        // Android hides "Allow restricted settings" when Hush itself opens its app info.
-        button(R.id.appsButton).setOnClickListener { startActivity(Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS)) }
-        button(R.id.batteryButton).setOnClickListener { openAppInfo() }
-        val group = findViewById<RadioGroup>(R.id.languageGroup)
-        for (language in Catalog.languages) {
-            group.addView(RadioButton(this).apply {
-                id = View.generateViewId()
-                tag = language.code
-                text = getString(R.string.language_option, language.label, language.note, megabytes(ModelStore.totalBytes(language.model)))
-                isChecked = language.code == prefs.languageCode
-            })
-        }
-        group.setOnCheckedChangeListener { radios, checkedId ->
-            prefs.languageCode = radios.findViewById<View>(checkedId).tag as String
-            refresh()
-        }
-        button(R.id.modelButton).setOnClickListener { onModelButton() }
+        store = ModelStore.of(this)
+        if (!languagePage) Thread({ store.prune(Catalog.models) }, "hush-prune").start()
+        addLanguageOptions()
+        view<View>(R.id.back).setOnClickListener { finish() }
+        view<TextView>(R.id.appBarTitle).setText(R.string.title_language)
+        view<View>(R.id.menuButton).setOnClickListener { showMenu(it) }
+        view<View>(R.id.changeButton).setOnClickListener { startActivity(languagePage(this)) }
+        view<View>(R.id.mainButton).setOnClickListener { onMainButton() }
+        view<View>(R.id.secondButton).setOnClickListener { onSecondButton() }
     }
 
     override fun onResume() {
@@ -66,92 +72,268 @@ class SetupActivity : Activity() {
         getSystemService(AccessibilityManager::class.java).removeAccessibilityServicesStateChangeListener(serviceListener)
     }
 
-    private fun onModelButton() {
-        val spec = Catalog.language(prefs.languageCode).model
-        val download = Downloads.status?.takeIf { it.specId == spec.id && it.running }
-        when {
-            download != null -> Downloads.cancel()
-            ModelStore.of(this).isReady(spec) -> ModelStore.of(this).delete(spec)
-            else -> Downloads.start(this, spec)
-        }
-        refresh()
-    }
-
-    private fun refreshModel() {
-        val spec = Catalog.language(prefs.languageCode).model
-        val store = ModelStore.of(this)
-        val download = Downloads.status?.takeIf { it.specId == spec.id }
-        val progress = findViewById<ProgressBar>(R.id.modelProgress)
-        val statusView = findViewById<TextView>(R.id.modelStatus)
-        val ready = store.isReady(spec)
-        progress.visibility = if (download?.running == true) View.VISIBLE else View.GONE
-        when {
-            download?.running == true -> {
-                val fraction = if (download.total > 0) download.done.toFloat() / download.total else 0f
-                progress.progress = (fraction * progress.max).toInt()
-                statusView.text = getString(R.string.status_model_downloading, (fraction * 100).toInt(), megabytes(download.total))
-                statusView.setTextColor(getColor(R.color.todo))
-                button(R.id.modelButton).setText(R.string.action_cancel)
-            }
-            ready -> {
-                status(R.id.modelStatus, true, R.string.status_model_ready, R.string.status_model_ready)
-                button(R.id.modelButton).setText(R.string.action_delete_model)
-            }
-            else -> {
-                statusView.text = download?.error?.let { getString(R.string.status_model_failed, it) }
-                    ?: getString(R.string.status_model_missing)
-                statusView.setTextColor(getColor(R.color.todo))
-                button(R.id.modelButton).text = getString(R.string.action_download, megabytes(store.missingBytes(spec)))
-            }
-        }
-    }
-
-    private fun megabytes(bytes: Long) = (bytes + 500_000) / 1_000_000
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         refresh()
     }
 
+    private fun language() = Catalog.language(prefs.languageCode)
+
     private fun refresh() {
         val mic = checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-        status(R.id.micStatus, mic, R.string.status_mic_on, R.string.status_mic_off)
-        button(R.id.micButton).visibility = if (mic) View.GONE else View.VISIBLE
-        status(R.id.a11yStatus, serviceEnabled(), R.string.status_service_on, R.string.status_service_off)
         val unrestricted = getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(packageName)
-        status(R.id.batteryStatus, unrestricted, R.string.status_battery_on, R.string.status_battery_off)
-        refreshModel()
-        findViewById<TextView>(R.id.diagnostics).text = diagnostics()
+        step = SetupStep.of(mic, store.isReady(language().model), serviceEnabled(this), unrestricted)
+        if (languagePage) showLanguagePage() else showStep()
     }
 
-    private fun serviceEnabled(): Boolean {
-        val me = ComponentName(this, HushService::class.java)
-        val enabled = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: ""
-        return enabled.split(':').any { ComponentName.unflattenFromString(it) == me }
-    }
-
-    private fun diagnostics(): String {
-        val version = packageManager.getPackageInfo(packageName, 0).versionName
-        val lines = listOf(
-            "Hush $version",
-            "${Build.MANUFACTURER} ${Build.MODEL}, ${Build.SOC_MANUFACTURER} ${Build.SOC_MODEL}",
-            "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})",
-            "mic: " + (prefs.noteOf(Diagnostics.MIC) ?: getString(R.string.diag_none)),
-            "engine: " + (prefs.noteOf(Diagnostics.ENGINE) ?: getString(R.string.diag_none)),
-            "insert: " + (prefs.noteOf(Diagnostics.INSERT) ?: getString(R.string.diag_none)),
+    private fun showStep() {
+        val ready = step == SetupStep.READY
+        show(R.id.appBar, false)
+        show(R.id.stepBar, !ready)
+        show(R.id.menuBar, ready)
+        if (!ready) {
+            val segments = view<ViewGroup>(R.id.segments)
+            for (i in 0 until segments.childCount) {
+                segments.getChildAt(i).setBackgroundResource(if (i < step.number - 1) R.drawable.step_on else R.drawable.step_off)
+            }
+            view<TextView>(R.id.stepLabel).text = getString(R.string.step_of, step.number)
+        }
+        when (step) {
+            SetupStep.MODEL -> hero(112, 66, 24)
+            SetupStep.READY -> hero(124, 74, 4)
+            else -> hero(140, 84, 24)
+        }
+        view<TextView>(R.id.title).setText(
+            when (step) {
+                SetupStep.MIC -> R.string.title_mic
+                SetupStep.MODEL -> R.string.title_language
+                SetupStep.SERVICE -> R.string.title_accessibility
+                SetupStep.BATTERY -> R.string.title_battery
+                SetupStep.READY -> R.string.title_ready
+            },
         )
-        return lines.joinToString("\n")
+        text(
+            R.id.lead,
+            when (step) {
+                SetupStep.MIC -> R.string.lead_mic
+                SetupStep.SERVICE -> R.string.lead_accessibility
+                SetupStep.BATTERY -> R.string.lead_battery
+                else -> null
+            },
+        )
+        show(R.id.summary, ready)
+        show(R.id.languageGroup, step == SetupStep.MODEL)
+        text(
+            R.id.note,
+            when (step) {
+                SetupStep.MODEL -> R.string.model_hint
+                SetupStep.SERVICE -> R.string.note_accessibility
+                SetupStep.BATTERY -> R.string.note_battery
+                else -> null
+            },
+        )
+        show(R.id.languageCard, ready)
+        show(R.id.testField, ready)
+        if (ready) {
+            val language = language()
+            view<TextView>(R.id.languageName).text = language.label
+            view<TextView>(R.id.languageModel).text =
+                getString(R.string.model_summary, language.note, megabytes(ModelStore.totalBytes(language.model)))
+        }
+        show(R.id.actions, !ready)
+        when (step) {
+            SetupStep.MIC -> actions(R.string.action_allow, null)
+            SetupStep.MODEL -> modelActions()
+            SetupStep.SERVICE -> actions(R.string.action_open_accessibility, R.string.action_open_apps)
+            SetupStep.BATTERY -> actions(R.string.action_app_info, null)
+            SetupStep.READY -> Unit
+        }
+    }
+
+    private fun showLanguagePage() {
+        show(R.id.appBar, true)
+        show(R.id.stepBar, false)
+        show(R.id.menuBar, false)
+        show(R.id.disc, false)
+        show(R.id.title, false)
+        show(R.id.lead, false)
+        show(R.id.summary, false)
+        show(R.id.languageGroup, true)
+        text(R.id.note, R.string.model_hint)
+        show(R.id.languageCard, false)
+        show(R.id.testField, false)
+        val spec = language().model
+        val busy = Downloads.status?.let { it.specId == spec.id && it.running } == true
+        show(R.id.actions, busy || !store.isReady(spec))
+        modelActions()
+    }
+
+    private fun hero(size: Int, ghost: Int, top: Int) {
+        val disc = view<View>(R.id.disc)
+        disc.visibility = View.VISIBLE
+        (disc.layoutParams as ViewGroup.MarginLayoutParams).apply {
+            width = dp(size)
+            height = dp(size)
+            topMargin = dp(top)
+        }
+        disc.requestLayout()
+        view<View>(R.id.ghost).layoutParams.apply {
+            width = dp(ghost)
+            height = (dp(ghost) * GHOST_RATIO).roundToInt()
+        }
+        show(R.id.title, true)
+    }
+
+    private fun actions(main: Int?, second: Int?) {
+        show(R.id.progressText, false)
+        show(R.id.progressBar, false)
+        button(R.id.mainButton, main?.let(::getString))
+        button(R.id.secondButton, second?.let(::getString))
+    }
+
+    private fun modelActions() {
+        val spec = language().model
+        val download = Downloads.status?.takeIf { it.specId == spec.id }
+        val anyRunning = Downloads.status?.running == true
+        val group = view<RadioGroup>(R.id.languageGroup)
+        // The language page is another activity, so the choice can change while this screen is in the back stack.
+        group.findViewWithTag<View>(language().code)?.let { if (group.checkedRadioButtonId != it.id) group.check(it.id) }
+        for (i in 0 until group.childCount) {
+            val option = group.getChildAt(i) as RadioButton
+            option.isEnabled = !anyRunning
+            option.alpha = if (anyRunning && !option.isChecked) DISABLED_ALPHA else 1f
+        }
+        val progressText = view<TextView>(R.id.progressText)
+        val progress = view<ProgressBar>(R.id.progressBar)
+        if (download?.running == true) {
+            val fraction = if (download.total > 0) download.done.toFloat() / download.total else 0f
+            progressText.text = getString(R.string.status_model_downloading, (fraction * 100).toInt(), megabytes(download.total))
+            progressText.visibility = View.VISIBLE
+            progress.progress = (fraction * progress.max).toInt()
+            progress.visibility = View.VISIBLE
+            button(R.id.mainButton, null)
+            button(R.id.secondButton, getString(R.string.action_cancel))
+        } else {
+            progressText.text = download?.error?.let { getString(R.string.status_model_failed, it) }
+            progressText.visibility = if (download?.error != null) View.VISIBLE else View.GONE
+            progress.visibility = View.GONE
+            button(R.id.mainButton, getString(R.string.action_download, megabytes(store.missingBytes(spec))))
+            button(R.id.secondButton, null)
+        }
+    }
+
+    private fun onMainButton() {
+        when {
+            languagePage || step == SetupStep.MODEL -> Downloads.start(this, language().model)
+            step == SetupStep.MIC -> askMic()
+            step == SetupStep.SERVICE -> startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+            step == SetupStep.BATTERY -> openAppInfo()
+        }
+        refresh()
+    }
+
+    private fun onSecondButton() {
+        when {
+            languagePage || step == SetupStep.MODEL -> Downloads.cancel()
+            // Android hides "Allow restricted settings" when Hush itself opens its app info.
+            step == SetupStep.SERVICE -> startActivity(Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS))
+        }
+    }
+
+    private fun askMic() {
+        // After a second "Don't allow", Android does not show the request again. Then only app info can allow it.
+        if (prefs.micAsked && !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+            openAppInfo()
+        } else {
+            prefs.micAsked = true
+            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.POST_NOTIFICATIONS), 1)
+        }
     }
 
     private fun openAppInfo() {
         startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)))
     }
 
-    private fun status(id: Int, ok: Boolean, onText: Int, offText: Int) {
-        findViewById<TextView>(id).apply {
-            setText(if (ok) onText else offText)
-            setTextColor(getColor(if (ok) R.color.ok else R.color.todo))
+    private fun addLanguageOptions() {
+        val group = view<RadioGroup>(R.id.languageGroup)
+        val regular = Typeface.create(resources.getFont(R.font.inter), 400, false)
+        val noteSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 13.5f, resources.displayMetrics).roundToInt()
+        for (language in Catalog.languages) {
+            val option = layoutInflater.inflate(R.layout.language_option, group, false) as RadioButton
+            option.id = View.generateViewId()
+            option.tag = language.code
+            val note = getString(R.string.option_note, language.note, megabytes(ModelStore.totalBytes(language.model)))
+            option.text = SpannableStringBuilder(language.label).append('\n').apply {
+                val start = length
+                append(note)
+                setSpan(AbsoluteSizeSpan(noteSize), start, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                setSpan(ForegroundColorSpan(getColor(R.color.mute)), start, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                setSpan(TypefaceSpan(regular), start, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+            group.addView(option)
+            if (language.code == language().code) option.isChecked = true
+        }
+        group.setOnCheckedChangeListener { radios, checkedId ->
+            prefs.languageCode = radios.findViewById<View>(checkedId).tag as String
         }
     }
 
-    private fun button(id: Int): Button = findViewById(id)
+    // The popup is the root of its own window, so it has no parent.
+    @SuppressLint("InflateParams")
+    private fun showMenu(anchor: View) {
+        val content = layoutInflater.inflate(R.layout.menu_popup, null)
+        // A known width lets Gravity.END put the popup 10 dp from the screen edge.
+        content.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        val popup = PopupWindow(content, content.measuredWidth, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+        popup.setBackgroundDrawable(getDrawable(R.drawable.bg_popup))
+        popup.elevation = dp(8).toFloat()
+        content.findViewById<View>(R.id.settingsItem).setOnClickListener {
+            popup.dismiss()
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        val button = anchor as ImageButton
+        button.setBackgroundResource(R.drawable.bg_menu_open)
+        button.imageTintList = ColorStateList.valueOf(getColor(R.color.fg))
+        popup.setOnDismissListener {
+            button.setBackgroundResource(R.drawable.bg_round_button)
+            button.imageTintList = null
+        }
+        popup.showAsDropDown(anchor, -dp(6), -dp(6), Gravity.END)
+    }
+
+    private fun text(id: Int, text: Int?) {
+        val view = view<TextView>(id)
+        if (text != null) view.setText(text)
+        view.visibility = if (text != null) View.VISIBLE else View.GONE
+    }
+
+    private fun button(id: Int, text: String?) {
+        val button = view<Button>(id)
+        button.text = text
+        button.visibility = if (text != null) View.VISIBLE else View.GONE
+    }
+
+    private fun show(id: Int, visible: Boolean) {
+        view<View>(id).visibility = if (visible) View.VISIBLE else View.GONE
+    }
+
+    private fun dp(value: Int) = (value * resources.displayMetrics.density).roundToInt()
+
+    private fun <T : View> view(id: Int): T = findViewById(id)
+
+    companion object {
+        private const val EXTRA_LANGUAGE_PAGE = "language_page"
+        // Height to width of the ghost drawable with its float marks.
+        private const val GHOST_RATIO = 62f / 54f
+        private const val DISABLED_ALPHA = 0.5f
+
+        fun languagePage(context: Context) = Intent(context, SetupActivity::class.java).putExtra(EXTRA_LANGUAGE_PAGE, true)
+
+        fun megabytes(bytes: Long) = (bytes + 500_000) / 1_000_000
+
+        fun serviceEnabled(context: Context): Boolean {
+            val me = ComponentName(context, HushService::class.java)
+            val enabled = Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: ""
+            return enabled.split(':').any { ComponentName.unflattenFromString(it) == me }
+        }
+    }
 }

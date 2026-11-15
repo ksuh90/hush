@@ -3,7 +3,7 @@ package app.hush
 data class ModelFile(val name: String, val url: String, val sha256: String, val bytes: Long)
 
 /** Model families that the engine can load. To add a family, add a value and a branch in [Engine]. */
-enum class Family { MOONSHINE, WHISPER }
+enum class Family { TRANSDUCER, WHISPER }
 
 data class ModelSpec(
     val id: String,
@@ -11,10 +11,11 @@ data class ModelSpec(
     val encoder: ModelFile,
     val decoder: ModelFile,
     val tokens: ModelFile,
+    val joiner: ModelFile? = null,
     /** Longest audio in seconds for one decode. */
     val maxChunkSeconds: Int,
 ) {
-    val files get() = listOf(encoder, decoder, tokens)
+    val files get() = listOfNotNull(encoder, decoder, joiner, tokens)
     val bytes get() = files.sumOf { it.bytes }
 }
 
@@ -35,23 +36,27 @@ object Catalog {
         643_854,
     )
 
-    private const val MOONSHINE_BASE_EN_URL =
-        "https://huggingface.co/csukuangfj2/sherpa-onnx-moonshine-base-en-quantized-2026-02-27/resolve/8f4d6c58c03d40bcea40043bb7120a878f2bbef6"
+    private const val PARAKEET_V2_URL =
+        "https://huggingface.co/csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v2-int8/resolve/84b478d541cdbf0c296a7ab5f1e20a6f8f998114"
 
-    val moonshineBaseEn = ModelSpec(
-        id = "moonshine-base-en-quantized-2026-02-27",
-        family = Family.MOONSHINE,
+    val parakeetV2 = ModelSpec(
+        id = "parakeet-tdt-0.6b-v2-int8",
+        family = Family.TRANSDUCER,
         encoder = ModelFile(
-            "encoder_model.ort", "$MOONSHINE_BASE_EN_URL/encoder_model.ort",
-            "7c66495948d0d08ec1af454cd4b5514862ae6511e94712a60e6d83eaec8dc8cf", 31_326_816,
+            "encoder.int8.onnx", "$PARAKEET_V2_URL/encoder.int8.onnx",
+            "92a10bd9c23936ea0566c29f963bc57c2a5df4261b6a8921c39abea66557ca8b", 652_282_309,
         ),
         decoder = ModelFile(
-            "decoder_model_merged.ort", "$MOONSHINE_BASE_EN_URL/decoder_model_merged.ort",
-            "d9d7b333af34bc552580576ddcf248a1c6c839e0d3b43b09afb9376ed009899d", 109_424_400,
+            "decoder.int8.onnx", "$PARAKEET_V2_URL/decoder.int8.onnx",
+            "4d097bae3bac5c96018d5293ba39f1b657296102b142affda40378f38b020f41", 7_257_753,
+        ),
+        joiner = ModelFile(
+            "joiner.int8.onnx", "$PARAKEET_V2_URL/joiner.int8.onnx",
+            "77a29f3e5ac7d37074e0af465391b80f314015d5b97f0f90c6c7767f1d56f428", 1_739_080,
         ),
         tokens = ModelFile(
-            "tokens.txt", "$MOONSHINE_BASE_EN_URL/tokens.txt",
-            "2870d843e14c1e187bf1913a521562a63b53933814bd7f2145120468f494a049", 549_350,
+            "tokens.txt", "$PARAKEET_V2_URL/tokens.txt",
+            "ec182b70dd42113aff6c5372c75cac58c952443eb22322f57bbd7f53977d497d", 9_384,
         ),
         maxChunkSeconds = 20,
     )
@@ -79,9 +84,11 @@ object Catalog {
     )
 
     val languages = listOf(
-        Language("en", "English", "Moonshine Base, fast", moonshineBaseEn),
+        Language("en", "English", "Parakeet v2, high accuracy", parakeetV2),
         Language("ko", "한국어 (Korean)", "Whisper Base, slower, basic accuracy", whisperBase),
     )
+
+    val models get() = languages.map { it.model }.distinct()
 
     fun language(code: String): Language = languages.firstOrNull { it.code == code } ?: languages.first()
 }

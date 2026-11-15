@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bubble_idle">#E6202124</color>
-    <color name="bubble_recording">#FFE53935</color>
-    <color name="bubble_halo">#55E53935</color>
-    <color name="bubble_confirm">#FF1E8E3E</color>
-    <color name="on_bubble">#FFFFFFFF</color>
-    <color name="ripple">#40FFFFFF</color>
-    <color name="brand">#FF3D5AFE</color>
-    <color name="ok">#FF1E8E3E</color>
-    <color name="todo">#FFC5221F</color>
+    <!-- Navy Gold logo colors. They do not change in dark mode. -->
+    <color name="navy">#FF0F1A3A</color>
+    <color name="gold">#FFFFC23D</color>
+    <color name="cream">#FFFFF1DC</color>
+    <color name="cheek">#FFE8743B</color>
+    <color name="glow">#47FFC23D</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Screen colors, light mode ("Cream and navy"). values-night has the dark mode values. -->
+    <color name="bg">#FFFFFAF0</color>
+    <color name="fg">#FF0F1A3A</color>
+    <color name="mute">#FF525A78</color>
+    <color name="card">#FFFFFFFF</color>
+    <color name="line">#FFEFE6D2</color>
+    <color name="field">#FF8A90A8</color>
+    <color name="btn">#FF0F1A3A</color>
+    <color name="btn_fg">#FFFFF1DC</color>
+    <color name="seg">#FF0F1A3A</color>
+    <color name="trk">#FFE9E1CF</color>
+    <color name="disc">#FF0F1A3A</color>
+    <color name="link">#FF0F1A3A</color>
+    <color name="danger">#FFB3261E</color>
+    <color name="ripple">#1F0F1A3A</color>
 </resources>

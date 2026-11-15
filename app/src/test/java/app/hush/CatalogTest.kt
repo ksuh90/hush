@@ -30,4 +30,11 @@ class CatalogTest {
         assertEquals("en", Catalog.language("xx").code)
         assertEquals("ko", Catalog.language("ko").code)
     }
+
+    @Test
+    fun transducersHaveAJoiner() {
+        for (spec in Catalog.languages.map { it.model }) {
+            assertEquals(spec.id, spec.family == Family.TRANSDUCER, spec.joiner != null)
+        }
+    }
 }
