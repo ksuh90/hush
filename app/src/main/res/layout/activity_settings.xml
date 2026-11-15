@@ -164,6 +164,16 @@
                 android:layout_marginTop="6dp"
                 android:paddingHorizontal="16dp" />
 
+            <!-- Shows when the words need more than 2 rows: "Show all 20 words" or "Show less". -->
+            <Button
+                android:id="@+id/wordsMore"
+                style="@style/Hush.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:drawablePadding="4dp"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

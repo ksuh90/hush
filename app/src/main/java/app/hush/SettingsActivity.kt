@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 
@@ -21,6 +22,11 @@ class SettingsActivity : Activity() {
 
     // The note under the words field: why words did not go in. Null shows the full note when the list is full.
     private var wordsNote: String? = null
+
+    // The words list shows only its first rows until the user taps "Show all". After an add, the list opens when
+    // the new words are in the rows that do not show, so the user sees them.
+    private var wordsOpen = false
+    private var showAdded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +39,8 @@ class SettingsActivity : Activity() {
         findViewById<View>(R.id.deleteRow).setOnClickListener { confirmDelete() }
         findViewById<View>(R.id.changeModel).setOnClickListener { startActivity(SetupActivity.languagePage(this)) }
         findViewById<View>(R.id.wordsAdd).setOnClickListener { addWords() }
+        findViewById<FlowLayout>(R.id.wordChips).onFlowChange = ::onWordsFlow
+        findViewById<View>(R.id.wordsMore).setOnClickListener { openWords(!wordsOpen) }
         findViewById<EditText>(R.id.wordsField).setOnEditorActionListener { _, action, _ ->
             (action == EditorInfo.IME_ACTION_DONE).also { if (it) addWords() }
         }
@@ -84,7 +92,8 @@ class SettingsActivity : Activity() {
         findViewById<View>(R.id.wordsOff).visibility = if (on) View.GONE else View.VISIBLE
         text(R.id.wordsOffText, getString(R.string.words_cannot, model.name))
         text(R.id.wordsExplain, getString(if (words.isEmpty()) R.string.words_explain_empty else R.string.words_explain))
-        val chips = findViewById<ViewGroup>(R.id.wordChips)
+        val chips = findViewById<FlowLayout>(R.id.wordChips)
+        chips.maxRows = if (wordsOpen) 0 else CLOSED_ROWS
         chips.removeAllViews()
         for (word in words) {
             val chip = LayoutInflater.from(this).inflate(R.layout.word_chip, chips, false)
@@ -96,6 +105,7 @@ class SettingsActivity : Activity() {
             enable(chip, on)
             chips.addView(chip)
         }
+        showMore()
         findViewById<TextView>(R.id.wordsCount).apply {
             text = getString(R.string.words_count, words.size, MyWords.MAX_WORDS)
             contentDescription = resources.getQuantityString(R.plurals.words_count_description, MyWords.MAX_WORDS, words.size, MyWords.MAX_WORDS)
@@ -141,10 +151,38 @@ class SettingsActivity : Activity() {
         field.setText(if (full) "" else result.tooLong.joinToString(", "))
         field.setSelection(field.length())
         if (result.words != words) prefs.myWords = result.words
+        showAdded = result.words.size > words.size
         showWords()
         // With a large font, the note can be under the keyboard. The user must see why words did not go in.
         if (wordsNote != null) findViewById<TextView>(R.id.wordsNote).let { note ->
             note.post { note.requestRectangleOnScreen(Rect(0, 0, note.width, note.height), false) }
+        }
+    }
+
+    /** After the chips get their rows: the button can change, and the list opens to show the words just added. */
+    private fun onWordsFlow() {
+        val chips = findViewById<FlowLayout>(R.id.wordChips)
+        if (showAdded && !wordsOpen && chips.shownCount < chips.childCount) openWords(true) else showMore()
+        showAdded = false
+    }
+
+    private fun openWords(open: Boolean) {
+        wordsOpen = open
+        findViewById<FlowLayout>(R.id.wordChips).maxRows = if (open) 0 else CLOSED_ROWS
+        showMore()
+    }
+
+    /** "Show all 20 words" or "Show less", only when the words need more rows than the closed list shows. */
+    private fun showMore() {
+        val chips = findViewById<FlowLayout>(R.id.wordChips)
+        findViewById<Button>(R.id.wordsMore).apply {
+            visibility = if (chips.rowCount > CLOSED_ROWS) View.VISIBLE else View.GONE
+            text = if (wordsOpen) {
+                getString(R.string.words_show_less)
+            } else {
+                resources.getQuantityString(R.plurals.words_show_all, chips.childCount, chips.childCount)
+            }
+            setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, if (wordsOpen) R.drawable.ic_chevron_up else R.drawable.ic_chevron_down, 0)
         }
     }
 
@@ -186,5 +224,6 @@ class SettingsActivity : Activity() {
     private companion object {
         const val DISABLED_ALPHA = 0.5f
         const val NOTE_WORD_CHARS = 28
+        const val CLOSED_ROWS = 2
     }
 }

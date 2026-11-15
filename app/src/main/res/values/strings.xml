@@ -79,6 +79,11 @@
     <string name="words_remove">Remove %1$s</string>
     <string name="words_only">Parakeet model only</string>
     <string name="words_cannot">%1$s cannot use your words.</string>
+    <plurals name="words_show_all">
+        <item quantity="one">Show all %1$d word</item>
+        <item quantity="other">Show all %1$d words</item>
+    </plurals>
+    <string name="words_show_less">Show less</string>
     <string name="words_count">%1$d of %2$d</string>
     <plurals name="words_count_description">
         <item quantity="one">%1$d of %2$d word</item>
