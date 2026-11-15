@@ -118,4 +118,37 @@
         <item name="android:background">@drawable/bg_round_button</item>
         <item name="android:scaleType">center</item>
     </style>
+
+    <!-- A text field: a white card with a field edge. Disabled, it has a flat fill and mute text. -->
+    <style name="Hush.Input" parent="Hush.Text">
+        <item name="android:background">@drawable/bg_input</item>
+        <item name="android:textColor">@color/text_field</item>
+        <item name="android:textColorHint">@color/mute</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:paddingHorizontal">18dp</item>
+        <item name="android:paddingVertical">12dp</item>
+    </style>
+
+    <!-- The banner that tells why a section is off: the info icon and the text, with a text button under it. -->
+    <style name="Hush.Warn" parent="">
+        <item name="android:background">@drawable/bg_warn</item>
+        <item name="android:layout_marginHorizontal">20dp</item>
+        <item name="android:paddingHorizontal">14dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Hush.WarnText" parent="Hush.Text">
+        <item name="android:textColor">@color/warn_fg</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineHeight">21sp</item>
+    </style>
+
+    <style name="Hush.WarnSub" parent="Hush.Text">
+        <item name="android:textColor">@color/warn_fg</item>
+        <item name="android:textSize">13.5sp</item>
+        <item name="android:lineHeight">19sp</item>
+    </style>
 </resources>

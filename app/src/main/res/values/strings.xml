@@ -20,7 +20,7 @@
     <string name="lead_battery">In app info, set Battery to Unrestricted.</string>
     <string name="note_battery">On a Samsung phone, also go to Settings &gt; Battery &gt; Background usage limits and add Hush to “Never sleeping apps”.</string>
     <string name="model_hint">Hush downloads the model one time. After that, Hush uses no network. Hush keeps one model for each language: when a new model is downloaded, Hush deletes the old one.</string>
-    <string name="try_hint">Tap here. The Hush ghost shows above the keyboard.</string>
+    <string name="try_hint">Tap here. The Hush ghost shows next to this field.</string>
 
     <string name="option_note">%1$s, %2$d\u00A0MB</string>
     <string name="model_summary">%1$s\u00A0·\u00A0%2$d\u00A0MB</string>
@@ -71,4 +71,13 @@
     <string name="notice_copied">Hush cannot type in this field. The text is on the clipboard. Paste it.</string>
 
     <string name="diag_none">No data yet.</string>
+    <string name="settings_words">My words</string>
+    <string name="words_explain">Hush spells these words your way. Type them with commas between.</string>
+    <string name="words_explain_empty">No words yet. Hush spells these words your way. Type them with commas between.</string>
+    <string name="words_hint">Add words</string>
+    <string name="words_add">Add the words</string>
+    <string name="words_remove">Remove %1$s</string>
+    <string name="words_only">Parakeet model only</string>
+    <string name="words_cannot">%1$s cannot use your words.</string>
+    <string name="action_change_model">Change model</string>
 </resources>

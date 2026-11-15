@@ -97,6 +97,108 @@
                 style="@style/Hush.Section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="@string/settings_words" />
+
+            <!-- Shows when the chosen model cannot use the words. -->
+            <LinearLayout
+                android:id="@+id/wordsOff"
+                style="@style/Hush.Warn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_info" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Hush.WarnText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/words_only" />
+
+                        <TextView
+                            android:id="@+id/wordsOffText"
+                            style="@style/Hush.WarnSub"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/changeModel"
+                    style="@style/Hush.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="22dp"
+                    android:text="@string/action_change_model" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/wordsExplain"
+                style="@style/Hush.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:paddingHorizontal="20dp" />
+
+            <app.hush.FlowLayout
+                android:id="@+id/wordChips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:paddingHorizontal="16dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingEnd="16dp">
+
+                <EditText
+                    android:id="@+id/wordsField"
+                    style="@style/Hush.Input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/words_hint"
+                    android:imeOptions="actionDone"
+                    android:importantForAutofill="no"
+                    android:inputType="text|textCapWords" />
+
+                <ImageButton
+                    android:id="@+id/wordsAdd"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/bg_add"
+                    android:contentDescription="@string/words_add"
+                    android:src="@drawable/ic_plus" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/Hush.Section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:text="@string/settings_help" />
 
             <LinearLayout

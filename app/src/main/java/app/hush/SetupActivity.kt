@@ -140,6 +140,7 @@ class SetupActivity : Activity() {
                 getString(R.string.model_summary, language.note, megabytes(ModelStore.totalBytes(language.model)))
         }
         show(R.id.actions, !ready)
+        floatActions(step == SetupStep.MODEL)
         when (step) {
             SetupStep.MIC -> actions(R.string.action_allow, null)
             SetupStep.MODEL -> modelActions()
@@ -164,6 +165,7 @@ class SetupActivity : Activity() {
         val spec = language().model
         val busy = Downloads.status?.let { it.specId == spec.id && it.running } == true
         show(R.id.actions, busy || !store.isReady(spec))
+        floatActions(true)
         modelActions()
     }
 
@@ -181,6 +183,20 @@ class SetupActivity : Activity() {
             height = (dp(ghost) * GHOST_RATIO).roundToInt()
         }
         show(R.id.title, true)
+    }
+
+    /**
+     * Where Hush downloads a model, the buttons and the progress sit on a floating card, and the text that scrolls
+     * under it fades out. Then the end of the page and the start of the card are clear.
+     */
+    private fun floatActions(on: Boolean) {
+        val actions = view<View>(R.id.actions)
+        actions.setBackgroundResource(if (on) R.drawable.bg_bar_card else 0)
+        actions.elevation = if (on) dp(CARD_ELEVATION).toFloat() else 0f
+        val margin = if (on) dp(CARD_MARGIN) else 0
+        (actions.layoutParams as ViewGroup.MarginLayoutParams).setMargins(margin, if (on) dp(4) else 0, margin, margin)
+        actions.setPaddingRelative(dp(20), dp(if (on) 14 else 12), dp(20), dp(if (on) 8 else 16))
+        show(R.id.fade, on && actions.visibility == View.VISIBLE)
     }
 
     private fun actions(main: Int?, second: Int?) {
@@ -330,6 +346,9 @@ class SetupActivity : Activity() {
         // Height to width of the ghost drawable with its float marks.
         private const val GHOST_RATIO = 62f / 54f
         private const val DISABLED_ALPHA = 0.5f
+        // The floating card of the buttons, in dp.
+        private const val CARD_MARGIN = 12
+        private const val CARD_ELEVATION = 10
 
         fun languagePage(context: Context) = Intent(context, SetupActivity::class.java).putExtra(EXTRA_LANGUAGE_PAGE, true)
 

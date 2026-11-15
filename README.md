@@ -7,6 +7,8 @@ Hush is private voice typing for Android. When a text field has focus and the ke
 - English, second choice: Moonshine Base (MIT), 142 MB download. It is faster and less accurate. Hush keeps one model for each language: when the chosen model is downloaded, Hush deletes the other one.
 - Korean: Whisper Base multilingual int8 (MIT), 161 MB download. It is slower and less accurate than the English model.
 
+My words: in Settings, add names and terms (for example PostgreSQL, Kubernetes, Yosemite) with commas between them. With Parakeet v2, Hush spells them your way. In a test on the emulator, 33 of 41 test words were correct with the list and 19 without it. The list put in no word that the speaker did not say. Moonshine and Whisper cannot use the list. Then the section stays, but it is off and says why. The words stay saved when you change the model.
+
 Hush downloads the model for the selected language one time. Hush checks the SHA-256 of each file. After the download, Hush uses no network.
 
 ## Build
@@ -35,7 +37,7 @@ The APK is `app/build/outputs/apk/release/app-release.apk`. The debug key signs 
 - `MicService` is a microphone foreground service. It runs only while Hush records.
 - `DictationMachine` has the states idle, recording and transcribing.
 - `Inserter` puts the text at the cursor with `commitText` from the accessibility input method. If that is not available, it uses `ACTION_SET_TEXT`. If that fails, it copies the text to the clipboard.
-- `Engine` cuts the audio into speech parts with Silero VAD and transcribes them. It loads the model when you tap the ghost and unloads it 60 s after the last use.
+- `Engine` cuts the audio into speech parts with Silero VAD and transcribes them. It loads the model when you tap the ghost and unloads it 60 s after the last use. Parakeet decodes with modified beam search and gets the user's words ("My words", `MyWords`) as sherpa-onnx hotwords for each decode, so a change to the list needs no new load. sherpa-onnx needs a SentencePiece vocab to encode the words. The model has only `tokens.txt`, so `ModelStore` makes `bpe.vocab` from it on the phone. A word with a character that the model has no token for does not go to the engine.
 
 - `SetupActivity` shows the first setup step that is not done, then the ready screen. `SettingsActivity` and `DiagnosticsActivity` open from the ⋮ menu.
 

@@ -32,6 +32,11 @@ class CatalogTest {
     }
 
     @Test
+    fun onlyParakeetTakesTheUsersWords() {
+        assertEquals(listOf(Catalog.parakeetV2), Catalog.models.filter { it.takesWords })
+    }
+
+    @Test
     fun modelChoiceFallsBackToTheDefault() {
         assertEquals(Catalog.parakeetV2, Catalog.language("en").model)
         assertEquals(Catalog.moonshineBaseEn, Catalog.language("en", Catalog.moonshineBaseEn.id).model)

@@ -78,137 +78,154 @@
             android:src="@drawable/ic_more" />
     </FrameLayout>
 
-    <ScrollView
-        android:id="@+id/scroll"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <LinearLayout
+        <ScrollView
+            android:id="@+id/scroll"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="12dp">
-
-            <FrameLayout
-                android:id="@+id/disc"
-                android:layout_width="140dp"
-                android:layout_height="140dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="24dp"
-                android:background="@drawable/bg_disc">
-
-                <ImageView
-                    android:id="@+id/ghost"
-                    android:layout_width="84dp"
-                    android:layout_height="96dp"
-                    android:layout_gravity="center"
-                    android:importantForAccessibility="no"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ghost" />
-            </FrameLayout>
-
-            <TextView
-                android:id="@+id/title"
-                style="@style/Hush.Title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:accessibilityHeading="true" />
-
-            <TextView
-                android:id="@+id/lead"
-                style="@style/Hush.Lead"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/summary"
-                style="@style/Hush.Lead.Sub"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/service_summary" />
-
-            <RadioGroup
-                android:id="@+id/languageGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="16dp" />
-
-            <TextView
-                android:id="@+id/note"
-                style="@style/Hush.Note"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+            android:layout_height="match_parent">
 
             <LinearLayout
-                android:id="@+id/languageCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/bg_card"
-                android:gravity="center_vertical"
-                android:minHeight="64dp"
-                android:orientation="horizontal"
-                android:paddingVertical="12dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="8dp">
+                android:orientation="vertical"
+                android:paddingBottom="12dp">
+
+                <FrameLayout
+                    android:id="@+id/disc"
+                    android:layout_width="140dp"
+                    android:layout_height="140dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="24dp"
+                    android:background="@drawable/bg_disc">
+
+                    <ImageView
+                        android:id="@+id/ghost"
+                        android:layout_width="84dp"
+                        android:layout_height="96dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ghost" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/title"
+                    style="@style/Hush.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:accessibilityHeading="true" />
+
+                <TextView
+                    android:id="@+id/lead"
+                    style="@style/Hush.Lead"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/summary"
+                    style="@style/Hush.Lead.Sub"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/service_summary" />
+
+                <RadioGroup
+                    android:id="@+id/languageGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="16dp" />
+
+                <TextView
+                    android:id="@+id/note"
+                    style="@style/Hush.Note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:id="@+id/languageCard"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_card"
+                    android:gravity="center_vertical"
+                    android:minHeight="64dp"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="8dp">
 
-                    <TextView
-                        android:id="@+id/languageName"
-                        style="@style/Hush.Strong"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/languageModel"
-                        style="@style/Hush.Small"
+                        <TextView
+                            android:id="@+id/languageName"
+                            style="@style/Hush.Strong"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/languageModel"
+                            style="@style/Hush.Small"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/changeButton"
+                        style="@style/Hush.TextButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/action_change"
+                        android:textSize="14.5sp" />
                 </LinearLayout>
 
-                <Button
-                    android:id="@+id/changeButton"
-                    style="@style/Hush.TextButton"
-                    android:layout_width="wrap_content"
+                <EditText
+                    android:id="@+id/testField"
+                    style="@style/Hush.Text"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/action_change"
-                    android:textSize="14.5sp" />
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_field"
+                    android:gravity="center_vertical|start"
+                    android:hint="@string/try_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:lineHeight="21sp"
+                    android:minHeight="96dp"
+                    android:padding="16dp"
+                    android:textColorHint="@color/mute"
+                    android:textSize="15sp" />
             </LinearLayout>
+        </ScrollView>
 
-            <EditText
-                android:id="@+id/testField"
-                style="@style/Hush.Text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_field"
-                android:gravity="center_vertical|start"
-                android:hint="@string/try_hint"
-                android:importantForAutofill="no"
-                android:inputType="textMultiLine|textCapSentences"
-                android:lineHeight="21sp"
-                android:minHeight="96dp"
-                android:padding="16dp"
-                android:textColorHint="@color/mute"
-                android:textSize="15sp" />
-        </LinearLayout>
-    </ScrollView>
+        <!-- Above the floating card: the text that scrolls under the card fades out. -->
+        <View
+            android:id="@+id/fade"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/bg_fade"
+            android:importantForAccessibility="no"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/actions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:outlineAmbientShadowColor="@color/navy"
+        android:outlineSpotShadowColor="@color/navy"
         android:paddingHorizontal="20dp"
         android:paddingTop="12dp"
         android:paddingBottom="16dp">

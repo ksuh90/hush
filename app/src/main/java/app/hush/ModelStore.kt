@@ -21,6 +21,20 @@ class ModelStore(private val root: File) {
 
     fun isReady(spec: ModelSpec) = parts(spec).all { (model, file) -> file.length() == model.bytes }
 
+    /**
+     * The SentencePiece vocab that sherpa-onnx needs to encode the user's words. The model has only tokens.txt,
+     * so Hush makes the vocab from it on the phone, one time.
+     */
+    fun bpeVocab(spec: ModelSpec): File {
+        val vocab = File(File(root, spec.id), BPE_VOCAB)
+        if (!vocab.exists()) {
+            val part = File(vocab.path + ".part")
+            part.writeText(MyWords.bpeVocab(file(spec, spec.tokens).readLines()))
+            if (!part.renameTo(vocab)) throw IOException("cannot move ${part.name}")
+        }
+        return vocab
+    }
+
     fun delete(spec: ModelSpec) {
         File(root, spec.id).deleteRecursively()
     }
@@ -35,6 +49,8 @@ class ModelStore(private val root: File) {
     fun prune(context: Context) = prune(Catalog.keep(Prefs(context).language, ::isReady))
 
     companion object {
+        private const val BPE_VOCAB = "bpe.vocab"
+
         fun totalBytes(spec: ModelSpec) = spec.bytes + Catalog.vad.bytes
 
         fun of(context: Context) = ModelStore(File(context.noBackupFilesDir, "models"))

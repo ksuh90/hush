@@ -7,6 +7,8 @@ enum class Family { TRANSDUCER, MOONSHINE, WHISPER }
 
 data class ModelSpec(
     val id: String,
+    /** The model name that the user sees. */
+    val name: String,
     val family: Family,
     val encoder: ModelFile,
     val decoder: ModelFile,
@@ -14,6 +16,8 @@ data class ModelSpec(
     val joiner: ModelFile? = null,
     /** Longest audio in seconds for one decode. */
     val maxChunkSeconds: Int,
+    /** True when the engine can use the user's words ("My words") with this model. */
+    val takesWords: Boolean = false,
 ) {
     val files get() = listOfNotNull(encoder, decoder, joiner, tokens)
     val bytes get() = files.sumOf { it.bytes }
@@ -46,6 +50,7 @@ object Catalog {
 
     val parakeetV2 = ModelSpec(
         id = "parakeet-tdt-0.6b-v2-int8",
+        name = "Parakeet v2",
         family = Family.TRANSDUCER,
         encoder = ModelFile(
             "encoder.int8.onnx", "$PARAKEET_V2_URL/encoder.int8.onnx",
@@ -64,6 +69,8 @@ object Catalog {
             "ec182b70dd42113aff6c5372c75cac58c952443eb22322f57bbd7f53977d497d", 9_384,
         ),
         maxChunkSeconds = 20,
+        // sherpa-onnx boosts the words when it decodes with modified beam search.
+        takesWords = true,
     )
 
     private const val MOONSHINE_BASE_EN_URL =
@@ -71,6 +78,7 @@ object Catalog {
 
     val moonshineBaseEn = ModelSpec(
         id = "moonshine-base-en-quantized-2026-02-27",
+        name = "Moonshine Base",
         family = Family.MOONSHINE,
         encoder = ModelFile(
             "encoder_model.ort", "$MOONSHINE_BASE_EN_URL/encoder_model.ort",
@@ -92,6 +100,7 @@ object Catalog {
 
     val whisperBase = ModelSpec(
         id = "whisper-base-int8",
+        name = "Whisper Base",
         family = Family.WHISPER,
         encoder = ModelFile(
             "base-encoder.int8.onnx", "$WHISPER_BASE_URL/base-encoder.int8.onnx",

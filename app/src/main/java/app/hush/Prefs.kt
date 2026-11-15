@@ -16,6 +16,11 @@ class Prefs(context: Context) {
         }
         set(value) = prefs.edit().putString("language", value.code).putString("model_${value.code}", value.model.id).apply()
 
+    /** The user's words ("My words"), in the order the user added them. They stay when the model changes. */
+    var myWords: List<String>
+        get() = prefs.getString("my_words", null)?.split('\n')?.filter { it.isNotEmpty() } ?: emptyList()
+        set(value) = prefs.edit().putString("my_words", value.joinToString("\n")).apply()
+
     /** True after Hush asked for the microphone one time. Then Android can stop showing the request. */
     var micAsked: Boolean
         get() = prefs.getBoolean("mic_asked", false)

@@ -222,13 +222,15 @@ class HushService : AccessibilityService(), Recorder.Listener {
             samples.all { it == 0f } -> dispatch(Event.Failed(session, Notice.MIC_SILENT))
             else -> {
                 val language = language()
+                val words = prefs.myWords
                 worker.execute {
                     val event = try {
                         val start = System.nanoTime()
-                        val text = engine.transcribe(language, samples)
+                        val text = engine.transcribe(language, samples, words)
                         val ms = (System.nanoTime() - start) / 1_000_000
                         val load = engine.takeLoadMs()?.let { ", model load %d ms".format(it) } ?: ""
-                        val note = "%s: %.1f s audio in %d ms%s".format(language.model.id, seconds, ms, load)
+                        val used = if (engine.wordsUsed > 0) ", my words %d".format(engine.wordsUsed) else ""
+                        val note = "%s: %.1f s audio in %d ms%s%s".format(language.model.id, seconds, ms, load, used)
                         Log.i(TAG, "engine: $note")
                         Diagnostics.engine(this, note)
                         Event.Transcribed(session, text)

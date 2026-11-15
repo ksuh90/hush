@@ -14,4 +14,11 @@
     <color name="link">#FFFFC23D</color>
     <color name="danger">#FFFFB4AB</color>
     <color name="ripple">#29FFF1DC</color>
+    <color name="card_edge">#FF34407A</color>
+    <color name="bg_clear">#000F1A3A</color>
+    <color name="warn_bg">#FF3B3A44</color>
+    <color name="warn_line">#FFFFC23D</color>
+    <color name="warn_fg">#FFFFF1DC</color>
+    <color name="off_fill">#FF16214A</color>
+    <color name="chip">#FF1A2652</color>
 </resources>
