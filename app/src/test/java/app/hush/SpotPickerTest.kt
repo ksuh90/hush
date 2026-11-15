@@ -18,8 +18,26 @@ class SpotPickerTest {
     private val emoji = Box(805, 1494, 931, 1620)
     private val send = Box(931, 1494, 1057, 1620)
 
-    private fun scene(field: Box, buttons: List<Box>, cursorLine: Box? = null) =
-        SpotPicker.Scene(screen, keyboard, field, cursorLine, buttons)
+    private fun scene(
+        field: Box,
+        buttons: List<Box>,
+        cursorLine: Box? = null,
+        inputs: List<Box> = emptyList(),
+        labels: List<Box> = emptyList(),
+    ) = SpotPicker.Scene(screen, keyboard, SpotPicker.Field(field, cursorLine, inputs, buttons, labels))
+
+    // Google Contacts, Create contact, on the API 33 emulator (uiautomator dump) with the keyboard open.
+    private val firstName = Box(137, 793, 933, 942)
+    private val lastName = Box(137, 978, 933, 1127)
+    private val company = Box(137, 1184, 933, 1333)
+    private val phone = Box(137, 1390, 933, 1539)
+    private val contactButtons = listOf(
+        Box(0, 73, 147, 220), Box(723, 83, 954, 209), Box(954, 83, 1080, 209), // cancel, save, more options
+        Box(382, 284, 697, 599), Box(406, 599, 673, 725), // add contact photo, add picture
+        Box(933, 778, 1080, 925), Box(137, 1575, 586, 1643), Box(460, 1586, 586, 1643), // more names, label menu
+        Box(0, 231, 1080, 1643), // the form (a scroll view)
+    )
+    private val contactLabels = listOf(Box(157, 110, 551, 183)) // "Create contact"
 
     private fun ghost(spot: Pair<Int, Int>) = Box.around(spot.first, spot.second, sizes.ghost)
     private fun cancel(spot: Pair<Int, Int>) = Box.around(spot.first - sizes.gap, spot.second, sizes.button)
@@ -44,6 +62,54 @@ class SpotPickerTest {
             assertFalse(cancel(spot).overlaps(box))
             assertFalse(confirm(spot).overlaps(box))
         }
+    }
+
+    @Test
+    fun contactsKeepsTheGhostOffTheOtherFields() {
+        for (focused in listOf(company, phone)) {
+            val inputs = listOf(firstName, lastName, company, phone) - focused
+            val spot = SpotPicker.pick(scene(focused, contactButtons.dropLast(1), inputs = inputs, labels = contactLabels), sizes)
+            assertFree(spot, focused, inputs + contactButtons.dropLast(1) + contactLabels)
+            // The check opens on no field either.
+            for (box in inputs) assertFalse("check at $spot covers $box", confirm(spot).overlaps(box))
+        }
+    }
+
+    @Test
+    fun anInputIsNeverCoveredEvenWhenWide() {
+        // Without the other fields, the ghost goes just above Company, on Last name.
+        val bare = SpotPicker.pick(scene(company, emptyList()), sizes)
+        assertTrue(ghost(bare).overlaps(lastName))
+        val spot = SpotPicker.pick(scene(company, emptyList(), inputs = listOf(firstName, lastName, phone)), sizes)
+        for (box in listOf(firstName, lastName, phone)) assertFalse("ghost at $spot covers $box", ghost(spot).overlaps(box))
+    }
+
+    @Test
+    fun messagesKeepsOffTheTextLabelWhenThereIsRoom() {
+        // Messages with an empty field. "Texting with 555-0100 (SMS/MMS)" is centered under "9:30 AM".
+        val field = Box(302, 1494, 805, 1620)
+        val row = Box(0, 1209, 1080, 1461)
+        val time = Box(479, 1209, 600, 1327)
+        val texting = Box(301, 1338, 779, 1408)
+        val buttons = listOf(Box(0, 1496, 126, 1622), Box(126, 1496, 263, 1622), emoji, row)
+        val spot = SpotPicker.pick(scene(field, buttons, labels = listOf(time, texting)), sizes)
+        assertFree(spot, field, buttons - row + time + texting)
+        assertTrue("the ghost stays near the field: $spot", field.top - spot.second < 300)
+        // X and the check open off the text too.
+        for (box in listOf(time, texting)) {
+            assertFalse("X at $spot covers $box", cancel(spot).overlaps(box))
+            assertFalse("check at $spot covers $box", confirm(spot).overlaps(box))
+        }
+    }
+
+    @Test
+    fun aLabelIsCoveredWhenNothingElseIsFree() {
+        // Text fills the space above the field: the ghost covers text, but no button.
+        val lines = (0 until 30).map { Box(0, 70 + it * 50, 1080, 110 + it * 50) }
+        val buttons = listOf(attach, emoji, send)
+        val spot = SpotPicker.pick(scene(messagesField, buttons, labels = lines), sizes)
+        assertFree(spot, messagesField, buttons)
+        assertTrue("the ghost stays near the field: $spot", messagesField.top - spot.second < 200)
     }
 
     @Test

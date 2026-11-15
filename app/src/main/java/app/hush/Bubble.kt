@@ -121,10 +121,7 @@ class Bubble(
         val metrics = windowManager.currentWindowMetrics
         val bounds = metrics.bounds
         val statusBar = metrics.windowInsets.getInsets(WindowInsets.Type.statusBars()).top
-        val next = SpotPicker.Scene(
-            SpotPicker.Box(bounds.left, bounds.top + statusBar, bounds.right, bounds.bottom),
-            keyboardTop, field.bounds, field.cursorLine, field.buttons,
-        )
+        val next = SpotPicker.Scene(SpotPicker.Box(bounds.left, bounds.top + statusBar, bounds.right, bounds.bottom), keyboardTop, field)
         if (next == scene) return
         scene = next
         spot = SpotPicker.pick(next, sizes)

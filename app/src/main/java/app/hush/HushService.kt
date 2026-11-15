@@ -32,7 +32,10 @@ class HushService : AccessibilityService(), Recorder.Listener {
     // moves or changes size.
     private var fieldNode: AccessibilityNodeInfo? = null
     private var fieldBounds: SpotPicker.Box? = null
-    private var buttons: List<SpotPicker.Box> = emptyList()
+    private var around = Around(emptyList(), emptyList(), emptyList())
+
+    /** The other inputs, the buttons and the labels in the window of the focused field. */
+    private class Around(val inputs: List<SpotPicker.Box>, val buttons: List<SpotPicker.Box>, val labels: List<SpotPicker.Box>)
 
     override fun onServiceConnected() {
         prefs = Prefs(this)
@@ -87,30 +90,58 @@ class HushService : AccessibilityService(), Recorder.Listener {
         if (field != fieldNode || bounds != fieldBounds) {
             fieldNode = field
             fieldBounds = bounds
-            buttons = buttonsAround(field)
+            around = around(field)
         }
         val cursor = if (SpotPicker.isTall(bounds, bubble.sizes)) cursorLine(field, bounds) else null
-        return SpotPicker.Field(bounds, cursor, buttons)
+        return SpotPicker.Field(bounds, cursor, around.inputs, around.buttons, around.labels)
     }
 
-    /** The bounds of the visible clickable and focusable views in the window of the field, other than the field. */
-    private fun buttonsAround(field: AccessibilityNodeInfo): List<SpotPicker.Box> {
-        val root = field.window?.root ?: return emptyList()
-        val found = ArrayList<SpotPicker.Box>()
+    /** Reads the visible views in the window of the field, other than the field. */
+    private fun around(field: AccessibilityNodeInfo): Around {
+        val inputs = ArrayList<SpotPicker.Box>()
+        val buttons = ArrayList<SpotPicker.Box>()
+        val labels = ArrayList<SpotPicker.Box>()
+        val root = field.window?.root ?: return Around(inputs, buttons, labels)
         val queue = ArrayDeque<AccessibilityNodeInfo>().apply { add(root) }
         val rect = Rect()
         var count = 0
+        var asked = 0
         while (queue.isNotEmpty() && count < MAX_NODES) {
             val node = queue.removeFirst()
             count++
             if (!node.isVisibleToUser) continue
-            if (node != field && (node.isClickable || node.isLongClickable || node.isFocusable)) {
-                node.getBoundsInScreen(rect)
-                found += rect.toBox()
-            }
             for (i in 0 until node.childCount) node.getChild(i)?.let(queue::add)
+            if (node == field) continue
+            node.getBoundsInScreen(rect)
+            when {
+                node.isEditable -> inputs += rect.toBox()
+                node.isClickable || node.isLongClickable || node.isFocusable -> buttons += rect.toBox()
+                !node.text.isNullOrBlank() -> labels += if (asked++ < MAX_LABELS) textBounds(node, rect.toBox()) else rect.toBox()
+                !node.contentDescription.isNullOrBlank() -> labels += rect.toBox()
+            }
         }
-        return found
+        return Around(inputs, buttons, labels)
+    }
+
+    /**
+     * The part of a text view that has text. A text view can be wider than its text, for example a centered
+     * line across the screen. When the app does not tell where the characters are, it is the whole view.
+     */
+    private fun textBounds(node: AccessibilityNodeInfo, bounds: SpotPicker.Box): SpotPicker.Box {
+        val key = AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
+        val length = node.text?.length ?: 0
+        if (length == 0 || key !in node.availableExtraData) return bounds
+        val args = Bundle().apply {
+            putInt(AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX, 0)
+            putInt(AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH, minOf(length, MAX_LABEL_CHARS))
+        }
+        if (!node.refreshWithExtraData(key, args)) return bounds
+        val chars = node.extras.getParcelableArray(key, RectF::class.java)?.filterNotNull()?.filter { !it.isEmpty }
+        if (chars.isNullOrEmpty()) return bounds
+        return SpotPicker.Box(
+            floor(chars.minOf { it.left }).toInt(), floor(chars.minOf { it.top }).toInt(),
+            ceil(chars.maxOf { it.right }).toInt(), ceil(chars.maxOf { it.bottom }).toInt(),
+        )
     }
 
     /** The text line with the cursor, across the field, or null when the app does not tell where the cursor is. */
@@ -253,6 +284,9 @@ class HushService : AccessibilityService(), Recorder.Listener {
         const val REFRESH_DELAY_MS = 80L
         // Enough for the views of a normal screen. Hush stops there to keep the walk short.
         const val MAX_NODES = 500
+        // Hush asks where the characters are for this many labels, and for this many characters of each.
+        const val MAX_LABELS = 40
+        const val MAX_LABEL_CHARS = 200
         // The height of the cursor line in an empty field.
         const val EMPTY_LINE_DP = 48
         const val UNLOAD_DELAY_MS = 60_000L

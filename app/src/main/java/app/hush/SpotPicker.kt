@@ -3,9 +3,12 @@ package app.hush
 import kotlin.math.abs
 
 /**
- * Picks the default ghost spot for a focused field: a free place that covers no button of the app and not the
- * cursor line. It prefers the place just above the field at its right end, and it leaves room for X and the
- * check beside the ghost. This object has no Android code, so JVM tests can check it. All values are pixels.
+ * Picks the default ghost spot for a focused field. The ghost never covers another input field, a button of the
+ * app or the cursor line. Of the free spots, it takes the one with the lowest cost: empty space is best, then a
+ * spot on a text label, then a spot on a part of a wide clickable row. Near the field is better than far, and just
+ * above the field at its right end is best. The picker also leaves room for X and the check beside the ghost, and
+ * keeps them off inputs and buttons when it can. This object has no Android code, so JVM tests can check it.
+ * All values are pixels.
  */
 object SpotPicker {
     data class Box(val left: Int, val top: Int, val right: Int, val bottom: Int) {
@@ -30,20 +33,21 @@ object SpotPicker {
     data class Sizes(val ghost: Int, val button: Int, val gap: Int, val space: Int, val edge: Int, val step: Int)
 
     /**
-     * [screen] is the part of the screen below the status bar. [cursorLine] is the text line with the cursor, from
-     * the left to the right of the field, or null when it is not known. [buttons] are the bounds of the clickable
-     * and focusable views in the window of the field, other than the field.
+     * What HushService reads from the window of the focused field, other than the field: [inputs] are the other
+     * editable fields, [buttons] the clickable and focusable views, and [labels] the text (or icons with a
+     * description) that the user cannot tap. [cursorLine] is the text line with the cursor, from the left to the
+     * right of the field, or null when it is not known.
      */
-    data class Scene(
-        val screen: Box,
-        val keyboardTop: Int?,
-        val field: Box,
+    data class Field(
+        val bounds: Box,
         val cursorLine: Box?,
+        val inputs: List<Box>,
         val buttons: List<Box>,
+        val labels: List<Box>,
     )
 
-    /** What HushService reads from the window of the focused field. See [Scene]. */
-    data class Field(val bounds: Box, val cursorLine: Box?, val buttons: List<Box>)
+    /** [screen] is the part of the screen below the status bar. */
+    data class Scene(val screen: Box, val keyboardTop: Int?, val field: Field)
 
     /** True when the field is so tall that the ghost can go inside it, away from the cursor line. */
     fun isTall(field: Box, sizes: Sizes) = field.height >= TALL * 2 * sizes.ghost
@@ -53,7 +57,8 @@ object SpotPicker {
         val screen = scene.screen
         val floor = (scene.keyboardTop ?: screen.bottom).coerceAtMost(screen.bottom) - sizes.space - sizes.ghost
         val ceiling = screen.top + sizes.space + sizes.ghost
-        val field = scene.field.copy(bottom = minOf(scene.field.bottom, floor + sizes.ghost))
+        val focused = scene.field.bounds
+        val field = focused.copy(bottom = minOf(focused.bottom, floor + sizes.ghost))
         // X and the check must fit on the screen beside the ghost.
         val reach = sizes.gap + sizes.button
         val low = screen.left + sizes.edge + reach
@@ -62,42 +67,39 @@ object SpotPicker {
         val above = field.top - sizes.space - sizes.ghost
         val fallback = preferredX to above.coerceIn(ceiling, maxOf(ceiling, floor))
 
-        // Small views are buttons and the ghost must not cover them. Wide views (list rows, other fields) stay
-        // usable when the ghost covers a part of them, so the ghost only moves a little to keep off them.
-        // Very large views (lists, containers) do not count.
+        // Views that hold the field, and very large views (lists, page containers), do not count.
         val screenArea = screen.area
-        val views = scene.buttons.filter { it.width > 0 && it.height > 0 && it.area * 4 <= screenArea && !it.contains(scene.field) }
-        val (wide, small) = views.partition { it.width * 2 > screen.width }
+        fun counts(box: Box) = box.width > 0 && box.height > 0 && !box.contains(focused)
+        fun notHuge(box: Box) = box.area * 4 <= screenArea
+        val inputs = scene.field.inputs.filter(::counts)
+        val views = scene.field.buttons.filter { counts(it) && notHuge(it) }
+        val labels = scene.field.labels.filter { counts(it) && notHuge(it) }
+        // A wide clickable view is a list row: it stays usable when the ghost covers a part of it.
+        val (rows, small) = views.partition { it.width * 2 > screen.width }
+        val blocked = inputs + small
 
-        val rows = ArrayList<Pair<Int, Int>>() // y and its extra cost
-        for (k in 0..OUTSIDE_ROWS) {
-            rows += above - k * sizes.step to 0
-            rows += field.bottom + sizes.space + sizes.ghost + k * sizes.step to 0
-        }
-        val inside = isTall(field, sizes) && scene.cursorLine != null
-        if (inside) {
-            var y = field.bottom - sizes.space - sizes.ghost
-            while (y >= field.top + sizes.space + sizes.ghost) {
-                rows += y to INSIDE_COST * sizes.ghost
-                y -= sizes.step
-            }
-        }
-        val columns = (generateSequence(high) { it - sizes.step }.takeWhile { it >= low } + preferredX).distinct().toList()
+        val tall = isTall(field, sizes) && scene.field.cursorLine != null
+        val ys = (generateSequence(floor) { it - sizes.step }.takeWhile { it >= ceiling } + above).distinct().toList()
+        val xs = (generateSequence(high) { it - sizes.step }.takeWhile { it >= low } + preferredX).distinct().toList()
 
         var best: Pair<Int, Int>? = null
         var bestCost = Long.MAX_VALUE
-        for ((y, extra) in rows) {
+        for (y in ys) {
             if (y < ceiling || y > floor) continue
-            for (x in columns) {
+            for (x in xs) {
                 val ghost = Box.around(x, y, sizes.ghost + sizes.space)
-                if (small.any { it.overlaps(ghost) }) continue
-                if (scene.cursorLine?.overlaps(ghost) == true) continue
-                if (extra == 0 && field.overlaps(ghost)) continue
-                var cost = abs(x - preferredX).toLong() + 2L * abs(y - above) + extra
-                cost += wide.count { it.overlaps(ghost) } * WIDE_COST * sizes.ghost
+                if (blocked.any { it.overlaps(ghost) }) continue
+                if (scene.field.cursorLine?.overlaps(ghost) == true) continue
+                val inField = field.overlaps(ghost)
+                if (inField && !(tall && field.contains(ghost))) continue
+                var cost = abs(x - preferredX).toLong() + 2L * abs(y - above)
+                if (inField) cost += INSIDE_COST * sizes.ghost
+                cost += labels.count { it.overlaps(ghost) } * LABEL_COST * sizes.ghost
+                cost += rows.count { it.overlaps(ghost) } * ROW_COST * sizes.ghost
                 val cancel = Box.around(x - sizes.gap, y, sizes.button)
                 val confirm = Box.around(x + sizes.gap, y, sizes.button)
-                cost += small.count { it.overlaps(cancel) || it.overlaps(confirm) } * BUTTON_COST * sizes.ghost
+                cost += blocked.count { it.overlaps(cancel) || it.overlaps(confirm) } * BUTTON_COST * sizes.ghost
+                cost += labels.count { it.overlaps(cancel) || it.overlaps(confirm) } * LABEL_BESIDE_COST * sizes.ghost
                 if (cost < bestCost) {
                     bestCost = cost
                     best = x to y
@@ -107,13 +109,17 @@ object SpotPicker {
         return best ?: fallback
     }
 
-    // Rows above and below the field that the picker tries.
-    private const val OUTSIDE_ROWS = 8
     // A field is tall when it is this many ghosts high.
     private const val TALL = 3
-    // Extra costs, in ghost half-sizes: a spot inside a tall field, a wide view under the ghost,
-    // and a button under X or the check.
-    private const val INSIDE_COST = 4
-    private const val WIDE_COST = 1L
+    // Extra costs, in ghost half-sizes. Moving one ghost half-size up or down costs 2.
+    // A spot inside a tall field:
+    private const val INSIDE_COST = 4L
+    // A text label under the ghost:
+    private const val LABEL_COST = 5L
+    // A part of a wide clickable row under the ghost:
+    private const val ROW_COST = 1L
+    // An input or a button under X or the check:
     private const val BUTTON_COST = 3L
+    // A text label under X or the check:
+    private const val LABEL_BESIDE_COST = 2L
 }
