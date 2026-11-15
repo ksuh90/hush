@@ -103,6 +103,26 @@ class SpotPickerTest {
     }
 
     @Test
+    fun hushSettingsKeepsTheGhostOffTheMyWordsText() {
+        // Hush 0.5.0 Settings on the API 33 emulator (uiautomator dump), "Add words" focused, no words yet.
+        // Text views are cut to their text, as HushService reads them. 0.5.0 put the ghost on "your way".
+        val field = Box(53, 942, 886, 1079)
+        val buttons = listOf(
+            Box(11, 73, 137, 199), Box(0, 323, 1080, 501), Box(0, 501, 1080, 670), // back, language row, delete row
+            Box(912, 947, 1038, 1073), Box(0, 1224, 1080, 1402), // +, diagnostics row
+        )
+        val labels = listOf(
+            Box(148, 100, 400, 173), Box(53, 257, 150, 307), // "Settings", "Speech"
+            Box(53, 353, 638, 414), Box(53, 419, 811, 470), Box(53, 527, 321, 588), Box(53, 593, 1012, 644),
+            Box(53, 717, 220, 767), Box(53, 804, 1000, 905), // "My words", "No words yet. Hush spells ..."
+            Box(53, 1158, 130, 1208), Box(53, 1254, 292, 1315), Box(53, 1320, 667, 1371), // "Help", "Diagnostics"
+            Box(53, 1449, 175, 1499), Box(53, 1541, 275, 1602), Box(53, 1618, 1027, 1643), // About
+        )
+        val spot = SpotPicker.pick(scene(field, buttons, labels = labels), sizes)
+        assertFree(spot, field, buttons.filter { it.width * 2 <= screen.width } + labels)
+    }
+
+    @Test
     fun aLabelIsCoveredWhenNothingElseIsFree() {
         // Text fills the space above the field: the ghost covers text, but no button.
         val lines = (0 until 30).map { Box(0, 70 + it * 50, 1080, 110 + it * 50) }

@@ -4,11 +4,11 @@ import kotlin.math.abs
 
 /**
  * Picks the default ghost spot for a focused field. The ghost never covers another input field, a button of the
- * app or the cursor line. Of the free spots, it takes the one with the lowest cost: empty space is best, then a
- * spot on a text label, then a spot on a part of a wide clickable row. Near the field is better than far, and just
- * above the field at its right end is best. The picker also leaves room for X and the check beside the ghost, and
- * keeps them off inputs and buttons when it can. This object has no Android code, so JVM tests can check it.
- * All values are pixels.
+ * app or the cursor line, and it covers text only when every free spot has text. Of the spots, it takes the one
+ * with the lowest cost: empty space is best, then a spot on a part of a wide clickable row. Near the field is
+ * better than far, and just above the field at its right end is best. The picker also leaves room for X and the
+ * check beside the ghost, and keeps them off inputs, buttons and text when it can. This object has no Android
+ * code, so JVM tests can check it. All values are pixels.
  */
 object SpotPicker {
     data class Box(val left: Int, val top: Int, val right: Int, val bottom: Int) {
@@ -82,6 +82,9 @@ object SpotPicker {
         val ys = (generateSequence(floor) { it - sizes.step }.takeWhile { it >= ceiling } + above).distinct().toList()
         val xs = (generateSequence(high) { it - sizes.step }.takeWhile { it >= low } + preferredX).distinct().toList()
 
+        // The best spot without text under the ghost, and the best spot of all.
+        var clear: Pair<Int, Int>? = null
+        var clearCost = Long.MAX_VALUE
         var best: Pair<Int, Int>? = null
         var bestCost = Long.MAX_VALUE
         for (y in ys) {
@@ -94,19 +97,24 @@ object SpotPicker {
                 if (inField && !(tall && field.contains(ghost))) continue
                 var cost = abs(x - preferredX).toLong() + 2L * abs(y - above)
                 if (inField) cost += INSIDE_COST * sizes.ghost
-                cost += labels.count { it.overlaps(ghost) } * LABEL_COST * sizes.ghost
+                val onText = labels.count { it.overlaps(ghost) }
+                cost += onText * LABEL_COST * sizes.ghost
                 cost += rows.count { it.overlaps(ghost) } * ROW_COST * sizes.ghost
                 val cancel = Box.around(x - sizes.gap, y, sizes.button)
                 val confirm = Box.around(x + sizes.gap, y, sizes.button)
                 cost += blocked.count { it.overlaps(cancel) || it.overlaps(confirm) } * BUTTON_COST * sizes.ghost
                 cost += labels.count { it.overlaps(cancel) || it.overlaps(confirm) } * LABEL_BESIDE_COST * sizes.ghost
+                if (onText == 0 && cost < clearCost) {
+                    clearCost = cost
+                    clear = x to y
+                }
                 if (cost < bestCost) {
                     bestCost = cost
                     best = x to y
                 }
             }
         }
-        return best ?: fallback
+        return clear ?: best ?: fallback
     }
 
     // A field is tall when it is this many ghosts high.
@@ -114,7 +122,7 @@ object SpotPicker {
     // Extra costs, in ghost half-sizes. Moving one ghost half-size up or down costs 2.
     // A spot inside a tall field:
     private const val INSIDE_COST = 4L
-    // A text label under the ghost:
+    // A text label under the ghost, when every free spot has text:
     private const val LABEL_COST = 5L
     // A part of a wide clickable row under the ghost:
     private const val ROW_COST = 1L
