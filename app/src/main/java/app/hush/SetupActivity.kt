@@ -249,7 +249,7 @@ class SetupActivity : Activity() {
             openAppInfo()
         } else {
             prefs.micAsked = true
-            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.POST_NOTIFICATIONS), 1)
+            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 1)
         }
     }
 
