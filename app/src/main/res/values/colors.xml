@@ -5,7 +5,8 @@
     <color name="gold">#FFFFC23D</color>
     <color name="cream">#FFFFF1DC</color>
     <color name="cheek">#FFE8743B</color>
-    <color name="glow">#47FFC23D</color>
+    <!-- Gold 30% over cream, for the check on the bubble. -->
+    <color name="soft_gold">#FFFFE3AC</color>
     <color name="white">#FFFFFFFF</color>
 
     <!-- Screen colors, light mode ("Cream and navy"). values-night has the dark mode values. -->

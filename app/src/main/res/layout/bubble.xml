@@ -1,56 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The ghost is 48 dp in an 80 dp frame for the voice ring. X and the check are 44 dp circles in 48 dp touch areas, 60 dp from the ghost center. -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- The ghost window: a 52 dp disc in an 80 dp frame for the gold ring. X and the check have their own windows
+     (bubble_button.xml), so this window never changes size. The padding leaves space for the shadow. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
     android:padding="6dp">
 
-    <ImageButton
-        android:id="@+id/cancel"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="-4dp"
-        android:background="@drawable/bubble_cancel"
-        android:contentDescription="@string/bubble_cancel"
-        android:elevation="3dp"
-        android:src="@drawable/ic_x"
-        android:visibility="gone" />
-
-    <FrameLayout
+    <app.hush.VoiceRing
+        android:id="@+id/ring"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:clipChildren="false">
-
-        <app.hush.VoiceRing
-            android:id="@+id/ring"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:importantForAccessibility="no" />
-
-        <ImageButton
-            android:id="@+id/mic"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="center"
-            android:background="@drawable/bubble_ghost"
-            android:contentDescription="@string/bubble_start"
-            android:elevation="3dp"
-            android:scaleType="center"
-            android:src="@drawable/ghost_plain" />
-    </FrameLayout>
+        android:importantForAccessibility="no" />
 
     <ImageButton
-        android:id="@+id/confirm"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="-4dp"
-        android:background="@drawable/bubble_confirm"
-        android:contentDescription="@string/bubble_confirm"
+        android:id="@+id/mic"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bubble_ghost"
+        android:contentDescription="@string/bubble_start"
+        android:elevation="3dp" />
+
+    <!-- Drawn on top of the disc. It takes no touches, so taps and drags go to the disc. -->
+    <app.hush.GhostView
+        android:id="@+id/ghost"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_gravity="center"
         android:elevation="3dp"
-        android:src="@drawable/ic_check"
-        android:visibility="gone" />
-</LinearLayout>
+        android:importantForAccessibility="no" />
+</FrameLayout>

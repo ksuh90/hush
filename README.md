@@ -1,6 +1,6 @@
 # Hush
 
-Hush is private voice typing for Android. When a text field has focus and the keyboard is open, Hush shows a small ghost button. Tap the ghost and speak. A gold ring around the ghost grows with your voice. Tap the check mark to put the text at the cursor. Tap X to stop without text. Speech recognition runs on the phone with [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx). Hush sends no audio or text to a server.
+Hush is private voice typing for Android. When a text field has focus and the keyboard is open, Hush shows a small ghost button. Tap the ghost and speak. A gold ring shows around the ghost, and the ghost moves with your voice. Tap the check mark to put the text at the cursor. Tap X to stop without text. Speech recognition runs on the phone with [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx). Hush sends no audio or text to a server.
 
 - Android 13 (API 33) or later, arm64-v8a only.
 - English: NVIDIA Parakeet TDT 0.6B v2 int8 (CC-BY-4.0), 662 MB download. It loads in about 2 s while you speak and uses about 780 MB of memory while it is loaded.
@@ -30,7 +30,7 @@ The APK is `app/build/outputs/apk/release/app-release.apk`. The debug key signs 
 ## How it works
 
 - `HushService` is an accessibility service. It shows the bubble when an editable, non-password field has input focus and the keyboard is open.
-- `Bubble` is a `TYPE_ACCESSIBILITY_OVERLAY` window. It never takes input focus. `VoiceRing` draws the voice-level ring and the turning arc while Hush transcribes.
+- `Bubble` shows the ghost, X and the check in three `TYPE_ACCESSIBILITY_OVERLAY` windows. They never take input focus. The ghost window does not change size, so the ghost stays in place when the buttons show. `GhostView` draws the ghost and moves it as `GhostMotion` says: the hem flutters, and with louder speech the ghost sways and squashes more. `VoiceRing` draws the ring while Hush records and the turning arc while Hush transcribes. With Remove animations on, the ghost and the arc stay still.
 - `MicService` is a microphone foreground service. It runs only while Hush records.
 - `DictationMachine` has the states idle, recording and transcribing.
 - `Inserter` puts the text at the cursor with `commitText` from the accessibility input method. If that is not available, it uses `ACTION_SET_TEXT`. If that fails, it copies the text to the clipboard.
