@@ -16,10 +16,29 @@ class Prefs(context: Context) {
         }
         set(value) = prefs.edit().putString("language", value.code).putString("model_${value.code}", value.model.id).apply()
 
-    /** The user's words ("My words"), in the order the user added them. They stay when the model changes. */
+    /**
+     * The user's words ("My words"), in the order the user added them. They stay when the model changes. A list from
+     * Hush 0.5.1 or older can be over the limits of [MyWords]: the first read cuts it one time and counts the words
+     * that went in [wordsRemoved].
+     */
     var myWords: List<String>
-        get() = prefs.getString("my_words", null)?.split('\n')?.filter { it.isNotEmpty() } ?: emptyList()
+        get() {
+            val saved = prefs.getString("my_words", null)?.split('\n')?.filter { it.isNotEmpty() } ?: emptyList()
+            val words = MyWords.fit(saved)
+            if (words.size < saved.size) {
+                prefs.edit()
+                    .putString("my_words", words.joinToString("\n"))
+                    .putInt("my_words_removed", wordsRemoved + saved.size - words.size)
+                    .apply()
+            }
+            return words
+        }
         set(value) = prefs.edit().putString("my_words", value.joinToString("\n")).apply()
+
+    /** The number of saved words that Hush removed to fit the limits. Settings tells the user one time and sets it to 0. */
+    var wordsRemoved: Int
+        get() = prefs.getInt("my_words_removed", 0)
+        set(value) = prefs.edit().putInt("my_words_removed", value).apply()
 
     /** True after Hush asked for the microphone one time. Then Android can stop showing the request. */
     var micAsked: Boolean

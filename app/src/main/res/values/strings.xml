@@ -72,12 +72,37 @@
 
     <string name="diag_none">No data yet.</string>
     <string name="settings_words">My words</string>
-    <string name="words_explain">Hush spells these words your way. Type them with commas between.</string>
-    <string name="words_explain_empty">No words yet. Hush spells these words your way. Type them with commas between.</string>
+    <string name="words_explain">Hush spells these words your way. Use names and terms, not sentences. Type them with commas between.</string>
+    <string name="words_explain_empty">No words yet. Hush spells these words your way. Use names and terms, not sentences. Type them with commas between.</string>
     <string name="words_hint">Add words</string>
     <string name="words_add">Add the words</string>
     <string name="words_remove">Remove %1$s</string>
     <string name="words_only">Parakeet model only</string>
     <string name="words_cannot">%1$s cannot use your words.</string>
+    <string name="words_count">%1$d of %2$d</string>
+    <plurals name="words_count_description">
+        <item quantity="one">%1$d of %2$d word</item>
+        <item quantity="other">%1$d of %2$d words</item>
+    </plurals>
+    <plurals name="words_full">
+        <item quantity="one">Your list is full (%1$d word). Remove a word to add a new one.</item>
+        <item quantity="other">Your list is full (%1$d words). Remove a word to add a new one.</item>
+    </plurals>
+    <plurals name="words_not_added">
+        <item quantity="one">%1$d word was not added.</item>
+        <item quantity="other">%1$d words were not added.</item>
+    </plurals>
+    <plurals name="words_too_long">
+        <item quantity="one">“%1$s” is too long. Use up to %2$d word and %3$d characters.</item>
+        <item quantity="other">“%1$s” is too long. Use up to %2$d words and %3$d characters.</item>
+    </plurals>
+    <plurals name="words_too_long_many">
+        <item quantity="one">%1$d entry is too long. Use up to %2$d words and %3$d characters in each.</item>
+        <item quantity="other">%1$d entries are too long. Use up to %2$d words and %3$d characters in each.</item>
+    </plurals>
+    <plurals name="words_removed">
+        <item quantity="one">Hush removed %1$d word from your list. The list now holds up to %2$d words, with up to %3$d words and %4$d characters in each.</item>
+        <item quantity="other">Hush removed %1$d words from your list. The list now holds up to %2$d words, with up to %3$d words and %4$d characters in each.</item>
+    </plurals>
     <string name="action_change_model">Change model</string>
 </resources>

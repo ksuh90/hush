@@ -123,8 +123,12 @@ class Bubble(
         val statusBar = metrics.windowInsets.getInsets(WindowInsets.Type.statusBars()).top
         val next = SpotPicker.Scene(SpotPicker.Box(bounds.left, bounds.top + statusBar, bounds.right, bounds.bottom), keyboardTop, field)
         if (next == scene) return
+        // When only the views near the field changed, the ghost stays while its place is still clear.
+        val last = scene
+        val same = last != null && last.screen == next.screen && last.keyboardTop == next.keyboardTop &&
+            last.field.bounds == next.field.bounds
         scene = next
-        spot = SpotPicker.pick(next, sizes)
+        spot = spot?.takeIf { same && SpotPicker.isClear(it, next, sizes) } ?: SpotPicker.pick(next, sizes)
     }
 
     // Sizes in pixels. The window padding is the same in both layouts.

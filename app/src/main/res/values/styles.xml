@@ -52,6 +52,11 @@
         <item name="android:lineHeight">19sp</item>
     </style>
 
+    <!-- A short message about a refused action, under the control that refused it. -->
+    <style name="Hush.FieldNote" parent="Hush.Small">
+        <item name="android:textColor">@color/danger</item>
+    </style>
+
     <!-- The privacy lines under About: body color, so they read as facts, not as a hint. -->
     <style name="Hush.About" parent="Hush.Text">
         <item name="android:textSize">15sp</item>

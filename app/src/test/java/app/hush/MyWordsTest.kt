@@ -19,13 +19,60 @@ class MyWordsTest {
 
     @Test
     fun aWordGoesInOnlyOnceInAnyCase() {
-        val words = MyWords.add(listOf("PostgreSQL"), "postgresql, Yosemite, YOSEMITE, Kubernetes")
-        assertEquals(listOf("PostgreSQL", "Yosemite", "Kubernetes"), words)
+        val added = MyWords.add(listOf("PostgreSQL"), "postgresql, Yosemite, YOSEMITE, Kubernetes")
+        assertEquals(MyWords.Added(listOf("PostgreSQL", "Yosemite", "Kubernetes"), emptyList(), 0), added)
     }
 
     @Test
     fun theOldSpellingStays() {
-        assertEquals(listOf("Grafana"), MyWords.add(listOf("Grafana"), "grafana"))
+        assertEquals(listOf("Grafana"), MyWords.add(listOf("Grafana"), "grafana").words)
+    }
+
+    @Test
+    fun thePasteGoesInUpToTwentyWordsAndCountsTheRest() {
+        val added = MyWords.add(numbered(1..17), (18..25).joinToString(", ") { "Word$it" })
+        assertEquals(numbered(1..20), added.words)
+        assertEquals(5, added.notAdded)
+        assertEquals(emptyList<String>(), added.tooLong)
+    }
+
+    @Test
+    fun aFullListTakesNoWord() {
+        assertEquals(MyWords.Added(numbered(1..20), emptyList(), 1), MyWords.add(numbered(1..20), "Brooklyn"))
+        // A copy of a word in the list is not a word that did not fit.
+        assertEquals(0, MyWords.add(numbered(1..20), "word3").notAdded)
+    }
+
+    @Test
+    fun anEntryCanHaveFourWordsAndFortyCharacters() {
+        assertFalse(MyWords.tooLong("San Francisco Bay Area"))
+        assertTrue(MyWords.tooLong("please share the quarterly project"))
+        assertFalse(MyWords.tooLong("A".repeat(40)))
+        assertTrue(MyWords.tooLong("A".repeat(41)))
+        assertFalse(MyWords.tooLong("New York Stock Exchange"))
+    }
+
+    @Test
+    fun aLongEntryStaysOutAndTheOthersGoIn() {
+        val added = MyWords.add(listOf("Hush"), "PostgreSQL, please send the weekly status report, Golden Gate")
+        assertEquals(listOf("Hush", "PostgreSQL", "Golden Gate"), added.words)
+        assertEquals(listOf("please send the weekly status report"), added.tooLong)
+        assertEquals(0, added.notAdded)
+    }
+
+    @Test
+    fun aLongEntryDoesNotTakeAPlaceInTheList() {
+        val added = MyWords.add(numbered(1..19), "one two three four five, Brooklyn, Queens")
+        assertEquals(numbered(1..19) + "Brooklyn", added.words)
+        assertEquals(listOf("one two three four five"), added.tooLong)
+        assertEquals(1, added.notAdded)
+    }
+
+    @Test
+    fun anOldListKeepsItsFirstTwentyWordsThatAreNotTooLong() {
+        val old = listOf("Hush", "a sentence with far too many words in it") + numbered(1..25)
+        assertEquals(listOf("Hush") + numbered(1..19), MyWords.fit(old))
+        assertEquals(numbered(1..3), MyWords.fit(numbered(1..3)))
     }
 
     @Test
@@ -58,6 +105,8 @@ class MyWordsTest {
     }
 
     private companion object {
+        fun numbered(range: IntRange) = range.map { "Word$it" }
+
         // Lines of a tokens.txt like the Parakeet one.
         val TOKENS = listOf("<unk> 0", "▁t 1", "▁ 2", ": 3", "/ 4", "' 5", "<blk> 6") +
             (('a'..'z') + ('A'..'Z')).mapIndexed { i, c -> "$c ${7 + i}" }

@@ -5,18 +5,47 @@ package app.hush
  * does. This object has no Android code, so JVM tests can check it.
  */
 object MyWords {
+    /** The most words in the list. With more, the engine writes more normal words with a capital letter. */
+    const val MAX_WORDS = 20
+    const val MAX_ENTRY_WORDS = 4
+    const val MAX_ENTRY_CHARS = 40
+
     /** The words in [input]. Commas and new lines separate them. Spaces are trimmed, and empty words go. */
     fun parse(input: String): List<String> =
         input.split(',', '\n').map { it.trim().replace(SPACES, " ") }.filter { it.isNotEmpty() }
 
-    /** [words] with the words of [input] at the end. A word that is already in the list, in any case, does not go in again. */
-    fun add(words: List<String>, input: String): List<String> = distinct(words + parse(input))
-
-    /** [words] without the second and later copies of a word. Upper and lower case are the same. */
-    fun distinct(words: List<String>): List<String> {
-        val seen = HashSet<String>()
-        return words.filter { seen.add(it.lowercase()) }
+    /**
+     * [words] with the words of [input] at the end, up to [MAX_WORDS]. A word that is already in the list, in any
+     * case, does not go in again. A word that is [tooLong] does not go in, and a word after the list is full does not
+     * go in.
+     */
+    fun add(words: List<String>, input: String): Added {
+        val list = words.toMutableList()
+        val seen = words.mapTo(HashSet()) { it.lowercase() }
+        val long = mutableListOf<String>()
+        var full = 0
+        for (word in parse(input)) {
+            if (!seen.add(word.lowercase())) continue
+            when {
+                tooLong(word) -> long += word
+                list.size >= MAX_WORDS -> full++
+                else -> list += word
+            }
+        }
+        return Added(list, long, full)
     }
+
+    /** The result of [add]: the new list, the words that are too long, and the number of words that did not fit. */
+    data class Added(val words: List<String>, val tooLong: List<String>, val notAdded: Int)
+
+    /**
+     * True when [word] has more than [MAX_ENTRY_WORDS] words or [MAX_ENTRY_CHARS] characters. The engine follows a
+     * long entry so strongly that it can drop the end of a dictation when the speaker says only a part of it.
+     */
+    fun tooLong(word: String): Boolean = word.length > MAX_ENTRY_CHARS || word.split(' ').size > MAX_ENTRY_WORDS
+
+    /** [words] from an older Hush, cut to the limits: the words that are [tooLong] go, then the words after [MAX_WORDS]. */
+    fun fit(words: List<String>): List<String> = words.filterNot(::tooLong).take(MAX_WORDS)
 
     /**
      * The hotwords text for sherpa-onnx: the words with "/" between them. A word goes only when the model has a

@@ -235,6 +235,29 @@ class SpotPickerTest {
     }
 
     @Test
+    fun theGhostStaysWhileItsPlaceIsClear() {
+        val buttons = listOf(attach, emoji, send)
+        val spot = SpotPicker.pick(scene(messagesField, buttons), sizes)
+        assertTrue(SpotPicker.isClear(spot, scene(messagesField, buttons, labels = listOf(Box(40, 300, 400, 360))), sizes))
+    }
+
+    @Test
+    fun theGhostMovesWhenANoteShowsUnderIt() {
+        // Hush Settings: a note shows under the field after the user taps +.
+        val buttons = listOf(attach, emoji, send)
+        val spot = SpotPicker.pick(scene(messagesField, buttons), sizes)
+        val note = Box(spot.first - 200, spot.second - 20, spot.first + 40, spot.second + 20)
+        assertFalse(SpotPicker.isClear(spot, scene(messagesField, buttons, labels = listOf(note)), sizes))
+        assertFalse(SpotPicker.isClear(spot, scene(messagesField, buttons + note), sizes))
+    }
+
+    @Test
+    fun aPlaceUnderTheKeyboardIsNotClear() {
+        assertFalse(SpotPicker.isClear(540 to keyboard, scene(messagesField, emptyList()), sizes))
+        assertFalse(SpotPicker.isClear(540 to screen.top, scene(messagesField, emptyList()), sizes))
+    }
+
+    @Test
     fun onlyFieldsThreeGhostsHighAreTall() {
         assertFalse(SpotPicker.isTall(messagesField, sizes))
         assertTrue(SpotPicker.isTall(Box(0, 200, 1080, 200 + 6 * 79), sizes))

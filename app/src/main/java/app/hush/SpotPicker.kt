@@ -52,13 +52,52 @@ object SpotPicker {
     /** True when the field is so tall that the ghost can go inside it, away from the cursor line. */
     fun isTall(field: Box, sizes: Sizes) = field.height >= TALL * 2 * sizes.ghost
 
+    /** The free height for the ghost center, the field, and the views that count, in [scene]. */
+    private class Room(private val scene: Scene, sizes: Sizes) {
+        val floor = (scene.keyboardTop ?: scene.screen.bottom).coerceAtMost(scene.screen.bottom) - sizes.space - sizes.ghost
+        val ceiling = scene.screen.top + sizes.space + sizes.ghost
+        val field = scene.field.bounds.let { it.copy(bottom = minOf(it.bottom, floor + sizes.ghost)) }
+        val tall = isTall(field, sizes) && scene.field.cursorLine != null
+        val cursorLine = scene.field.cursorLine
+
+        // Views that hold the field, and very large views (lists, page containers), do not count.
+        private fun counts(box: Box) = box.width > 0 && box.height > 0 && !box.contains(scene.field.bounds)
+        private fun notHuge(box: Box) = box.area * 4 <= scene.screen.area
+        val labels = scene.field.labels.filter { counts(it) && notHuge(it) }
+        private val views = scene.field.buttons.filter { counts(it) && notHuge(it) }
+
+        // A wide clickable view is a list row: it stays usable when the ghost covers a part of it.
+        val rows = views.filter { it.width * 2 > scene.screen.width }
+        val blocked = scene.field.inputs.filter(::counts) + views.filter { it.width * 2 <= scene.screen.width }
+
+        /** True when the ghost box can never go here: on an input, a small button, the cursor line or the field. */
+        fun shut(ghost: Box): Boolean {
+            if (blocked.any { it.overlaps(ghost) }) return true
+            if (cursorLine?.overlaps(ghost) == true) return true
+            return field.overlaps(ghost) && !(tall && field.contains(ghost))
+        }
+    }
+
+    /**
+     * True when the ghost at [spot] still has a free place in [scene]: it covers no input, button, text or cursor
+     * line, and it is between the status bar and the keyboard. Then the ghost can stay when only the views near the
+     * field change, for example when a note shows under the field.
+     */
+    fun isClear(spot: Pair<Int, Int>, scene: Scene, sizes: Sizes): Boolean {
+        val room = Room(scene, sizes)
+        val (x, y) = spot
+        if (y < room.ceiling || y > room.floor) return false
+        val ghost = Box.around(x, y, sizes.ghost + sizes.space)
+        return !room.shut(ghost) && room.labels.none { it.overlaps(ghost) }
+    }
+
     /** Returns the ghost center. */
     fun pick(scene: Scene, sizes: Sizes): Pair<Int, Int> {
         val screen = scene.screen
-        val floor = (scene.keyboardTop ?: screen.bottom).coerceAtMost(screen.bottom) - sizes.space - sizes.ghost
-        val ceiling = screen.top + sizes.space + sizes.ghost
-        val focused = scene.field.bounds
-        val field = focused.copy(bottom = minOf(focused.bottom, floor + sizes.ghost))
+        val room = Room(scene, sizes)
+        val floor = room.floor
+        val ceiling = room.ceiling
+        val field = room.field
         // X and the check must fit on the screen beside the ghost.
         val reach = sizes.gap + sizes.button
         val low = screen.left + sizes.edge + reach
@@ -66,19 +105,10 @@ object SpotPicker {
         val preferredX = (field.right - sizes.ghost).coerceIn(low, high)
         val above = field.top - sizes.space - sizes.ghost
         val fallback = preferredX to above.coerceIn(ceiling, maxOf(ceiling, floor))
+        val labels = room.labels
+        val rows = room.rows
+        val blocked = room.blocked
 
-        // Views that hold the field, and very large views (lists, page containers), do not count.
-        val screenArea = screen.area
-        fun counts(box: Box) = box.width > 0 && box.height > 0 && !box.contains(focused)
-        fun notHuge(box: Box) = box.area * 4 <= screenArea
-        val inputs = scene.field.inputs.filter(::counts)
-        val views = scene.field.buttons.filter { counts(it) && notHuge(it) }
-        val labels = scene.field.labels.filter { counts(it) && notHuge(it) }
-        // A wide clickable view is a list row: it stays usable when the ghost covers a part of it.
-        val (rows, small) = views.partition { it.width * 2 > screen.width }
-        val blocked = inputs + small
-
-        val tall = isTall(field, sizes) && scene.field.cursorLine != null
         val ys = (generateSequence(floor) { it - sizes.step }.takeWhile { it >= ceiling } + above).distinct().toList()
         val xs = (generateSequence(high) { it - sizes.step }.takeWhile { it >= low } + preferredX).distinct().toList()
 
@@ -91,10 +121,8 @@ object SpotPicker {
             if (y < ceiling || y > floor) continue
             for (x in xs) {
                 val ghost = Box.around(x, y, sizes.ghost + sizes.space)
-                if (blocked.any { it.overlaps(ghost) }) continue
-                if (scene.field.cursorLine?.overlaps(ghost) == true) continue
+                if (room.shut(ghost)) continue
                 val inField = field.overlaps(ghost)
-                if (inField && !(tall && field.contains(ghost))) continue
                 var cost = abs(x - preferredX).toLong() + 2L * abs(y - above)
                 if (inField) cost += INSIDE_COST * sizes.ghost
                 val onText = labels.count { it.overlaps(ghost) }

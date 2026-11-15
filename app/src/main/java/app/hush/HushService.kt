@@ -28,10 +28,11 @@ class HushService : AccessibilityService(), Recorder.Listener {
     private val refreshTask = Runnable { refresh() }
     private val unloadTask = Runnable { worker.execute { engine.release() } }
 
-    // The focused field and the views around it. Hush reads the views once per focus, and again when the field
-    // moves or changes size.
+    // The focused field and the views around it. Hush reads the views once per focus, again when the field moves or
+    // changes size, and again when other views in its window change ([aroundChanged]).
     private var fieldNode: AccessibilityNodeInfo? = null
     private var fieldBounds: SpotPicker.Box? = null
+    private var aroundChanged = false
     private var around = Around(emptyList(), emptyList(), emptyList())
 
     /** The other inputs, the buttons and the labels in the window of the focused field. */
@@ -48,6 +49,15 @@ class HushService : AccessibilityService(), Recorder.Listener {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
+        // A view that shows or goes in the window of the field can be where the ghost is, for example a note under
+        // the field. Only these changes make Hush read the views again: text that changes (typing, a clock) does not.
+        val field = fieldNode
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED && field != null &&
+            event.contentChangeTypes and AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE != 0 &&
+            event.windowId == field.windowId && event.source != field
+        ) {
+            aroundChanged = true
+        }
         main.removeCallbacks(refreshTask)
         main.postDelayed(refreshTask, REFRESH_DELAY_MS)
     }
@@ -87,9 +97,10 @@ class HushService : AccessibilityService(), Recorder.Listener {
 
     private fun fieldOf(field: AccessibilityNodeInfo): SpotPicker.Field {
         val bounds = Rect().also(field::getBoundsInScreen).toBox()
-        if (field != fieldNode || bounds != fieldBounds) {
+        if (field != fieldNode || bounds != fieldBounds || aroundChanged) {
             fieldNode = field
             fieldBounds = bounds
+            aroundChanged = false
             around = around(field)
         }
         val cursor = if (SpotPicker.isTall(bounds, bubble.sizes)) cursorLine(field, bounds) else null
