@@ -23,7 +23,7 @@ The APK is `app/build/outputs/apk/release/app-release.apk`. The debug key signs 
 ## Install
 
 1. Copy the APK to the phone and open it, or run `adb install -r app-release.apk`.
-2. Open Hush and do the four steps on the screen, one at a time: microphone, language and speech model, accessibility service, battery. Then Hush shows "Hush is ready". Settings is in the ⋮ menu.
+2. Open Hush and do the four steps on the screen, one at a time: microphone, language and speech model, accessibility service, battery (you can skip the battery step). Then Hush shows "Hush is ready". Settings is in the ⋮ menu.
 3. If Android shows "Restricted setting" for the accessibility service, open Settings > Apps > Hush, tap ⋮, tap "Allow restricted settings", and try again. Do not open app info from Hush: then Android does not show this menu item.
 
 ## How it works

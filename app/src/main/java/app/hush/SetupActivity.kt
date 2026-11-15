@@ -81,7 +81,7 @@ class SetupActivity : Activity() {
     private fun refresh() {
         val mic = checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
         val unrestricted = getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(packageName)
-        step = SetupStep.of(mic, store.isReady(language().model), serviceEnabled(this), unrestricted)
+        step = SetupStep.of(mic, store.isReady(language().model), serviceEnabled(this), unrestricted, prefs.batterySkipped)
         if (languagePage) showLanguagePage() else showStep()
     }
 
@@ -144,7 +144,7 @@ class SetupActivity : Activity() {
             SetupStep.MIC -> actions(R.string.action_allow, null)
             SetupStep.MODEL -> modelActions()
             SetupStep.SERVICE -> actions(R.string.action_open_accessibility, R.string.action_open_apps)
-            SetupStep.BATTERY -> actions(R.string.action_app_info, null)
+            SetupStep.BATTERY -> actions(R.string.action_app_info, R.string.action_skip)
             SetupStep.READY -> Unit
         }
     }
@@ -236,6 +236,10 @@ class SetupActivity : Activity() {
             languagePage || step == SetupStep.MODEL -> Downloads.cancel()
             // Android hides "Allow restricted settings" when Hush itself opens its app info.
             step == SetupStep.SERVICE -> startActivity(Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS))
+            step == SetupStep.BATTERY -> {
+                prefs.batterySkipped = true
+                refresh()
+            }
         }
     }
 

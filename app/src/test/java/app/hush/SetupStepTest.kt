@@ -14,6 +14,18 @@ class SetupStepTest {
     }
 
     @Test
+    fun skippedBatteryStepGoesToReady() {
+        assertEquals(SetupStep.READY, SetupStep.of(mic = true, model = true, service = true, battery = false, batterySkipped = true))
+    }
+
+    @Test
+    fun skipDoesNotHideOtherSteps() {
+        assertEquals(SetupStep.MIC, SetupStep.of(mic = false, model = true, service = true, battery = false, batterySkipped = true))
+        assertEquals(SetupStep.MODEL, SetupStep.of(mic = true, model = false, service = true, battery = false, batterySkipped = true))
+        assertEquals(SetupStep.SERVICE, SetupStep.of(mic = true, model = true, service = false, battery = false, batterySkipped = true))
+    }
+
+    @Test
     fun stepsAreNumberedOneToFour() {
         assertEquals(listOf(1, 2, 3, 4), SetupStep.entries.filter { it != SetupStep.READY }.map { it.number })
     }

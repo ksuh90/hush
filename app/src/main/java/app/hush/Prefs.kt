@@ -17,6 +17,11 @@ class Prefs(context: Context) {
         get() = prefs.getBoolean("mic_asked", false)
         set(value) = prefs.edit().putBoolean("mic_asked", value).apply()
 
+    /** True after the user tapped Skip on the battery step. */
+    var batterySkipped: Boolean
+        get() = prefs.getBoolean("battery_skipped", false)
+        set(value) = prefs.edit().putBoolean("battery_skipped", value).apply()
+
     /** Bubble center in screen pixels, or null when the user did not move it. */
     var bubbleAnchor: Pair<Int, Int>?
         get() {
