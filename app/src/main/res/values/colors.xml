@@ -5,8 +5,10 @@
     <color name="gold">#FFFFC23D</color>
     <color name="cream">#FFFFF1DC</color>
     <color name="cheek">#FFE8743B</color>
-    <!-- Gold 30% over cream, for the check on the bubble. -->
-    <color name="soft_gold">#FFFFE3AC</color>
+    <!-- The bubble discs: cream, and gold 30% over cream for the check. They are 70% opaque (B3),
+         so the text under the bubble shows through. -->
+    <color name="bubble_disc">#B3FFF1DC</color>
+    <color name="bubble_check">#B3FFE3AC</color>
     <color name="white">#FFFFFFFF</color>
 
     <!-- Screen colors, light mode ("Cream and navy"). values-night has the dark mode values. -->

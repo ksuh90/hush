@@ -10,8 +10,8 @@ android {
         applicationId = "app.hush"
         minSdk = 33
         targetSdk = 33
-        versionCode = 6
-        versionName = "0.4.0"
+        versionCode = 7
+        versionName = "0.4.1"
         ndk { abiFilters += "arm64-v8a" }
     }
 
