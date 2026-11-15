@@ -18,7 +18,7 @@ class DiagnosticsActivity : Activity() {
     override fun onResume() {
         super.onResume()
         val prefs = Prefs(this)
-        val language = Catalog.language(prefs.languageCode)
+        val language = prefs.language
         val ready = ModelStore.of(this).isReady(language.model)
         val lines = listOf(
             "Hush ${packageManager.getPackageInfo(packageName, 0).versionName}",

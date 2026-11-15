@@ -19,7 +19,7 @@
     <string name="note_accessibility">If Android shows “Restricted setting”: tap “Open apps”, tap Hush, tap ⋮ (top right), tap “Allow restricted settings”, and try again.</string>
     <string name="lead_battery">In app info, set Battery to Unrestricted.</string>
     <string name="note_battery">On a Samsung phone, also go to Settings &gt; Battery &gt; Background usage limits and add Hush to “Never sleeping apps”.</string>
-    <string name="model_hint">Hush downloads the model one time. After that, Hush uses no network.</string>
+    <string name="model_hint">Hush downloads the model one time. After that, Hush uses no network. Hush keeps one model for each language: when a new model is downloaded, Hush deletes the old one.</string>
     <string name="try_hint">Tap here. The Hush ghost shows above the keyboard.</string>
 
     <string name="option_note">%1$s, %2$d\u00A0MB</string>

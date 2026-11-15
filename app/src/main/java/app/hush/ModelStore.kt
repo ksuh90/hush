@@ -21,8 +21,6 @@ class ModelStore(private val root: File) {
 
     fun isReady(spec: ModelSpec) = parts(spec).all { (model, file) -> file.length() == model.bytes }
 
-    fun missingBytes(spec: ModelSpec) = parts(spec).filter { (model, file) -> file.length() != model.bytes }.sumOf { it.first.bytes }
-
     fun delete(spec: ModelSpec) {
         File(root, spec.id).deleteRecursively()
     }
@@ -32,6 +30,9 @@ class ModelStore(private val root: File) {
         val ids = keep.map { it.id }.toSet()
         root.listFiles()?.filter { it.isDirectory && it.name !in ids }?.forEach { it.deleteRecursively() }
     }
+
+    /** Deletes the models that [Catalog.keep] does not keep for the chosen language. */
+    fun prune(context: Context) = prune(Catalog.keep(Prefs(context).language, ::isReady))
 
     companion object {
         fun totalBytes(spec: ModelSpec) = spec.bytes + Catalog.vad.bytes

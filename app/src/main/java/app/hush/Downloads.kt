@@ -31,6 +31,8 @@ object Downloads {
                     Downloader().fetch(model, file, { done -> update(Status(spec.id, before + done, total, true)) }) { cancelled }
                     before += model.bytes
                 }
+                // The new model is ready, so the other model of the same language can go.
+                store.prune(context.applicationContext)
                 update(Status(spec.id, total, total, running = false), force = true)
             } catch (e: CancellationException) {
                 update(null, force = true)

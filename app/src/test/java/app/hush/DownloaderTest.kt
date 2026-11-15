@@ -99,7 +99,6 @@ class DownloaderTest {
         val store = ModelStore(temp.root)
         val spec = Catalog.parakeetV2
         assertFalse(store.isReady(spec))
-        assertEquals(spec.bytes + Catalog.vad.bytes, store.missingBytes(spec))
         for ((file, place) in store.parts(spec)) {
             place.parentFile!!.mkdirs()
             java.io.RandomAccessFile(place, "rw").use { it.setLength(file.bytes) }
@@ -107,19 +106,32 @@ class DownloaderTest {
         assertTrue(store.isReady(spec))
         store.delete(spec)
         assertFalse(store.isReady(spec))
-        assertEquals(spec.bytes, store.missingBytes(spec))
     }
 
     @Test
     fun pruneKeepsOnlyCatalogModels() {
         val store = ModelStore(temp.root)
-        val old = File(temp.root, "moonshine-base-en-quantized-2026-02-27").apply { mkdirs() }
+        val old = File(temp.root, "moonshine-tiny-en-int8").apply { mkdirs() }
         File(old, "encoder_model.ort").writeText("x")
         val kept = store.file(Catalog.parakeetV2, Catalog.parakeetV2.tokens).apply { parentFile!!.mkdirs(); writeText("x") }
         store.vadFile().writeText("x")
-        store.prune(Catalog.languages.map { it.model })
+        store.prune(Catalog.models)
         assertFalse(old.exists())
         assertTrue(kept.exists())
         assertTrue(store.vadFile().exists())
+    }
+
+    @Test
+    fun pruneAfterSwitchDeletesTheOtherEnglishModel() {
+        val store = ModelStore(temp.root)
+        for (spec in listOf(Catalog.parakeetV2, Catalog.moonshineBaseEn)) {
+            for ((file, place) in store.parts(spec)) {
+                place.parentFile!!.mkdirs()
+                java.io.RandomAccessFile(place, "rw").use { it.setLength(file.bytes) }
+            }
+        }
+        store.prune(Catalog.keep(Catalog.language("en", Catalog.moonshineBaseEn.id), store::isReady))
+        assertTrue(store.isReady(Catalog.moonshineBaseEn))
+        assertFalse(File(temp.root, Catalog.parakeetV2.id).exists())
     }
 }

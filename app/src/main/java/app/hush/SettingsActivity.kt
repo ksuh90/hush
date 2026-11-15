@@ -40,7 +40,7 @@ class SettingsActivity : Activity() {
     }
 
     private fun refresh() {
-        val language = Catalog.language(prefs.languageCode)
+        val language = prefs.language
         val megabytes = SetupActivity.megabytes(ModelStore.totalBytes(language.model))
         text(R.id.languageSummary, getString(R.string.language_summary, language.label, language.note, megabytes))
         val downloading = Downloads.status?.let { it.specId == language.model.id && it.running } == true
@@ -53,7 +53,7 @@ class SettingsActivity : Activity() {
     }
 
     private fun confirmDelete() {
-        val spec = Catalog.language(prefs.languageCode).model
+        val spec = prefs.language.model
         val dialog = AlertDialog.Builder(this)
             .setTitle(R.string.delete_confirm_title)
             .setMessage(getString(R.string.delete_confirm_text, SetupActivity.megabytes(ModelStore.totalBytes(spec))))

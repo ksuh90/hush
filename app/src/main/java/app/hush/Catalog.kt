@@ -3,7 +3,7 @@ package app.hush
 data class ModelFile(val name: String, val url: String, val sha256: String, val bytes: Long)
 
 /** Model families that the engine can load. To add a family, add a value and a branch in [Engine]. */
-enum class Family { TRANSDUCER, WHISPER }
+enum class Family { TRANSDUCER, MOONSHINE, WHISPER }
 
 data class ModelSpec(
     val id: String,
@@ -19,14 +19,19 @@ data class ModelSpec(
     val bytes get() = files.sumOf { it.bytes }
 }
 
-/** A dictation language. [modelLanguage] is the code that a multilingual model gets. */
+/**
+ * A dictation language with one of its models. A language can have more than one entry, one for each model.
+ * The first entry of a language is its default. [modelLanguage] is the code that a multilingual model gets.
+ */
 data class Language(
     val code: String,
     val label: String,
     val note: String,
     val model: ModelSpec,
     val modelLanguage: String = code,
-)
+) {
+    val key get() = "$code/${model.id}"
+}
 
 object Catalog {
     val vad = ModelFile(
@@ -61,6 +66,27 @@ object Catalog {
         maxChunkSeconds = 20,
     )
 
+    private const val MOONSHINE_BASE_EN_URL =
+        "https://huggingface.co/csukuangfj2/sherpa-onnx-moonshine-base-en-quantized-2026-02-27/resolve/8f4d6c58c03d40bcea40043bb7120a878f2bbef6"
+
+    val moonshineBaseEn = ModelSpec(
+        id = "moonshine-base-en-quantized-2026-02-27",
+        family = Family.MOONSHINE,
+        encoder = ModelFile(
+            "encoder_model.ort", "$MOONSHINE_BASE_EN_URL/encoder_model.ort",
+            "7c66495948d0d08ec1af454cd4b5514862ae6511e94712a60e6d83eaec8dc8cf", 31_326_816,
+        ),
+        decoder = ModelFile(
+            "decoder_model_merged.ort", "$MOONSHINE_BASE_EN_URL/decoder_model_merged.ort",
+            "d9d7b333af34bc552580576ddcf248a1c6c839e0d3b43b09afb9376ed009899d", 109_424_400,
+        ),
+        tokens = ModelFile(
+            "tokens.txt", "$MOONSHINE_BASE_EN_URL/tokens.txt",
+            "2870d843e14c1e187bf1913a521562a63b53933814bd7f2145120468f494a049", 549_350,
+        ),
+        maxChunkSeconds = 20,
+    )
+
     private const val WHISPER_BASE_URL =
         "https://huggingface.co/csukuangfj/sherpa-onnx-whisper-base/resolve/bb53ee204431c90d314c1cc08d28d23e5b7927cc"
 
@@ -85,10 +111,24 @@ object Catalog {
 
     val languages = listOf(
         Language("en", "English", "Parakeet v2, high accuracy", parakeetV2),
+        Language("en", "English", "Moonshine Base, fast", moonshineBaseEn),
         Language("ko", "한국어 (Korean)", "Whisper Base, slower, basic accuracy", whisperBase),
     )
 
     val models get() = languages.map { it.model }.distinct()
 
-    fun language(code: String): Language = languages.firstOrNull { it.code == code } ?: languages.first()
+    /** The entry for [code] with the model [modelId]. Without a match, the default model of the language, then English. */
+    fun language(code: String, modelId: String? = null): Language =
+        languages.firstOrNull { it.code == code && it.model.id == modelId }
+            ?: languages.firstOrNull { it.code == code }
+            ?: languages.first()
+
+    /**
+     * The models to keep on the phone. Hush keeps one model for each language: when the [chosen] model is ready,
+     * the other models of that language go. Until then the old model stays, so the user can go back to it.
+     */
+    fun keep(chosen: Language, ready: (ModelSpec) -> Boolean): Set<ModelSpec> {
+        val drop = if (ready(chosen.model)) languages.filter { it.code == chosen.code }.map { it.model } - chosen.model else emptyList()
+        return models.toSet() - drop.toSet()
+    }
 }

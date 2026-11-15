@@ -4,6 +4,7 @@ Hush is private voice typing for Android. When a text field has focus and the ke
 
 - Android 13 (API 33) or later, arm64-v8a only.
 - English: NVIDIA Parakeet TDT 0.6B v2 int8 (CC-BY-4.0), 662 MB download. It loads in about 2 s while you speak and uses about 780 MB of memory while it is loaded.
+- English, second choice: Moonshine Base (MIT), 142 MB download. It is faster and less accurate. Hush keeps one model for each language: when the chosen model is downloaded, Hush deletes the other one.
 - Korean: Whisper Base multilingual int8 (MIT), 161 MB download. It is slower and less accurate than the English model.
 
 Hush downloads the model for the selected language one time. Hush checks the SHA-256 of each file. After the download, Hush uses no network.

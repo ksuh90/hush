@@ -30,7 +30,7 @@ class HushService : AccessibilityService(), Recorder.Listener {
         worker = Executors.newSingleThreadExecutor()
         bubble = Bubble(this, prefs, ::onAction)
         Recorder.listener = this
-        worker.execute { ModelStore.of(this).prune(Catalog.models) }
+        worker.execute { ModelStore.of(this).prune(this) }
         refresh()
     }
 
@@ -85,7 +85,7 @@ class HushService : AccessibilityService(), Recorder.Listener {
         effects.forEach(::run)
     }
 
-    private fun language() = Catalog.language(prefs.languageCode)
+    private fun language() = prefs.language
 
     private fun run(effect: Effect) {
         when (effect) {

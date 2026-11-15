@@ -8,9 +8,13 @@ import java.util.Date
 class Prefs(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("hush", Context.MODE_PRIVATE)
 
-    var languageCode: String
-        get() = prefs.getString("language", null) ?: Catalog.languages.first().code
-        set(value) = prefs.edit().putString("language", value).apply()
+    /** The chosen language and model. Hush remembers the model of each language. */
+    var language: Language
+        get() {
+            val code = prefs.getString("language", null) ?: Catalog.languages.first().code
+            return Catalog.language(code, prefs.getString("model_$code", null))
+        }
+        set(value) = prefs.edit().putString("language", value.code).putString("model_${value.code}", value.model.id).apply()
 
     /** True after Hush asked for the microphone one time. Then Android can stop showing the request. */
     var micAsked: Boolean

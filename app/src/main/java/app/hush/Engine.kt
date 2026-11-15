@@ -2,6 +2,7 @@ package app.hush
 
 import android.content.Context
 import com.k2fsa.sherpa.onnx.OfflineModelConfig
+import com.k2fsa.sherpa.onnx.OfflineMoonshineModelConfig
 import com.k2fsa.sherpa.onnx.OfflineRecognizer
 import com.k2fsa.sherpa.onnx.OfflineRecognizerConfig
 import com.k2fsa.sherpa.onnx.OfflineTransducerModelConfig
@@ -96,6 +97,14 @@ class Engine(context: Context) {
                 tokens = tokens,
                 numThreads = THREADS,
                 modelType = "nemo_transducer",
+            )
+            Family.MOONSHINE -> OfflineModelConfig(
+                moonshine = OfflineMoonshineModelConfig(
+                    encoder = path(spec, spec.encoder),
+                    mergedDecoder = path(spec, spec.decoder),
+                ),
+                tokens = tokens,
+                numThreads = THREADS,
             )
             Family.WHISPER -> OfflineModelConfig(
                 whisper = OfflineWhisperModelConfig(

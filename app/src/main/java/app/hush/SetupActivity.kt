@@ -47,7 +47,7 @@ class SetupActivity : Activity() {
         setContentView(R.layout.activity_setup)
         prefs = Prefs(this)
         store = ModelStore.of(this)
-        if (!languagePage) Thread({ store.prune(Catalog.models) }, "hush-prune").start()
+        if (!languagePage) Thread({ store.prune(this) }, "hush-prune").start()
         addLanguageOptions()
         view<View>(R.id.back).setOnClickListener { finish() }
         view<TextView>(R.id.appBarTitle).setText(R.string.title_language)
@@ -76,7 +76,7 @@ class SetupActivity : Activity() {
         refresh()
     }
 
-    private fun language() = Catalog.language(prefs.languageCode)
+    private fun language() = prefs.language
 
     private fun refresh() {
         val mic = checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
@@ -196,7 +196,7 @@ class SetupActivity : Activity() {
         val anyRunning = Downloads.status?.running == true
         val group = view<RadioGroup>(R.id.languageGroup)
         // The language page is another activity, so the choice can change while this screen is in the back stack.
-        group.findViewWithTag<View>(language().code)?.let { if (group.checkedRadioButtonId != it.id) group.check(it.id) }
+        group.findViewWithTag<View>(language().key)?.let { if (group.checkedRadioButtonId != it.id) group.check(it.id) }
         for (i in 0 until group.childCount) {
             val option = group.getChildAt(i) as RadioButton
             option.isEnabled = !anyRunning
@@ -206,7 +206,7 @@ class SetupActivity : Activity() {
         val progress = view<ProgressBar>(R.id.progressBar)
         if (download?.running == true) {
             val fraction = if (download.total > 0) download.done.toFloat() / download.total else 0f
-            progressText.text = getString(R.string.status_model_downloading, (fraction * 100).toInt(), megabytes(download.total))
+            progressText.text = getString(R.string.status_model_downloading, (fraction * 100).toInt(), megabytes(ModelStore.totalBytes(spec)))
             progressText.visibility = View.VISIBLE
             progress.progress = (fraction * progress.max).toInt()
             progress.visibility = View.VISIBLE
@@ -216,7 +216,7 @@ class SetupActivity : Activity() {
             progressText.text = download?.error?.let { getString(R.string.status_model_failed, it) }
             progressText.visibility = if (download?.error != null) View.VISIBLE else View.GONE
             progress.visibility = View.GONE
-            button(R.id.mainButton, getString(R.string.action_download, megabytes(store.missingBytes(spec))))
+            button(R.id.mainButton, getString(R.string.action_download, megabytes(ModelStore.totalBytes(spec))))
             button(R.id.secondButton, null)
         }
     }
@@ -264,7 +264,7 @@ class SetupActivity : Activity() {
         for (language in Catalog.languages) {
             val option = layoutInflater.inflate(R.layout.language_option, group, false) as RadioButton
             option.id = View.generateViewId()
-            option.tag = language.code
+            option.tag = language.key
             val note = getString(R.string.option_note, language.note, megabytes(ModelStore.totalBytes(language.model)))
             option.text = SpannableStringBuilder(language.label).append('\n').apply {
                 val start = length
@@ -274,10 +274,11 @@ class SetupActivity : Activity() {
                 setSpan(TypefaceSpan(regular), start, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
             group.addView(option)
-            if (language.code == language().code) option.isChecked = true
+            if (language.key == language().key) option.isChecked = true
         }
         group.setOnCheckedChangeListener { radios, checkedId ->
-            prefs.languageCode = radios.findViewById<View>(checkedId).tag as String
+            val key = radios.findViewById<View>(checkedId).tag as String
+            prefs.language = Catalog.languages.first { it.key == key }
         }
     }
 
