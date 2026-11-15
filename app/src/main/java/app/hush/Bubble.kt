@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
+import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.ImageButton
 import kotlin.math.abs
@@ -41,6 +42,8 @@ class Bubble(
     private var confirmShown = false
     private var keyboardTop: Int? = null
     private var dragAnchor: Pair<Int, Int>? = null
+    private var scene: SpotPicker.Scene? = null
+    private var spot: Pair<Int, Int>? = null
 
     // DragListener calls performClick for a tap.
     @SuppressLint("ClickableViewAccessibility")
@@ -61,15 +64,21 @@ class Bubble(
         listen()
     }
 
-    fun render(visible: Boolean, state: State, keyboardTop: Int?) {
-        this.keyboardTop = keyboardTop
+    /** [field] is the focused field and the views around it, or null when it is not known. */
+    fun render(visible: Boolean, state: State, keyboardTop: Int?, field: SpotPicker.Field?) {
         if (!visible) {
+            this.keyboardTop = keyboardTop
             remove()
             return
         }
         this.visible = true
         val recording = state is State.Recording
         val transcribing = state is State.Transcribing
+        // While Hush records or transcribes, the ghost stays where it is.
+        if (!recording && !transcribing) {
+            this.keyboardTop = keyboardTop
+            pickSpot(field)
+        }
         expanded = recording || transcribing
         confirmShown = recording
         ring.mode = when {
@@ -97,6 +106,30 @@ class Bubble(
 
     private fun dp(value: Int) = (value * density).roundToInt()
 
+    val sizes
+        get() = SpotPicker.Sizes(
+            ghost = dp(GHOST_HALF), button = button / 2, gap = dp(BUTTON_GAP), space = dp(SPACE), edge = dp(EDGE), step = dp(STEP),
+        )
+
+    /** Picks the default spot again only when the field, the views around it or the keyboard changed. */
+    private fun pickSpot(field: SpotPicker.Field?) {
+        if (field == null) {
+            scene = null
+            spot = null
+            return
+        }
+        val metrics = windowManager.currentWindowMetrics
+        val bounds = metrics.bounds
+        val statusBar = metrics.windowInsets.getInsets(WindowInsets.Type.statusBars()).top
+        val next = SpotPicker.Scene(
+            SpotPicker.Box(bounds.left, bounds.top + statusBar, bounds.right, bounds.bottom),
+            keyboardTop, field.bounds, field.cursorLine, field.buttons,
+        )
+        if (next == scene) return
+        scene = next
+        spot = SpotPicker.pick(next, sizes)
+    }
+
     // Sizes in pixels. The window padding is the same in both layouts.
     private val pad get() = main.root.paddingStart
     private val frame get() = ring.layoutParams.width
@@ -108,6 +141,8 @@ class Bubble(
     private fun anchor(): Pair<Int, Int> {
         dragAnchor?.let { return it }
         prefs.bubbleAnchor?.let { return clamp(it) }
+        spot?.let { return it }
+        // Without the field bounds: above the keyboard on the right.
         val bounds = windowManager.currentWindowMetrics.bounds
         // Leave space for the check button, so that the ghost does not move when recording starts.
         val x = bounds.width() - dp(EDGE) - reach
@@ -223,8 +258,12 @@ class Bubble(
 
     private companion object {
         // Sizes in dp.
-        // Half of the 0.3.0 ghost (48 dp). The start position stays the same with the 52 dp disc.
+        // Half of the 0.3.0 ghost (48 dp), for the spot when the field bounds are not known.
         const val START_HALF = 24
+        // For the spot picker: half of the ghost with its ring, the free space around it, and the search step.
+        const val GHOST_HALF = 30
+        const val SPACE = 4
+        const val STEP = 12
         // From the ghost center to the center of the X or the check.
         const val BUTTON_GAP = 60
         // From the screen edge to the outer edge of the check button.

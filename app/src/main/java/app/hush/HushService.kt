@@ -3,6 +3,8 @@ package app.hush
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.graphics.Rect
+import android.graphics.RectF
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -12,6 +14,8 @@ import android.view.accessibility.AccessibilityWindowInfo
 import android.widget.Toast
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.ceil
+import kotlin.math.floor
 
 /** Shows the bubble on focused text fields and runs one dictation at a time. */
 class HushService : AccessibilityService(), Recorder.Listener {
@@ -23,6 +27,12 @@ class HushService : AccessibilityService(), Recorder.Listener {
     private lateinit var worker: ExecutorService
     private val refreshTask = Runnable { refresh() }
     private val unloadTask = Runnable { worker.execute { engine.release() } }
+
+    // The focused field and the views around it. Hush reads the views once per focus, and again when the field
+    // moves or changes size.
+    private var fieldNode: AccessibilityNodeInfo? = null
+    private var fieldBounds: SpotPicker.Box? = null
+    private var buttons: List<SpotPicker.Box> = emptyList()
 
     override fun onServiceConnected() {
         prefs = Prefs(this)
@@ -65,9 +75,65 @@ class HushService : AccessibilityService(), Recorder.Listener {
         if (!::bubble.isInitialized) return
         val keyboard = keyboardTop()
         val busy = machine.state != State.Idle
-        val visible = busy || (keyboard != null && focusedField() != null)
-        bubble.render(visible, machine.state, keyboard)
+        val field = focusedField()
+        val visible = busy || (keyboard != null && field != null)
+        if (!visible) fieldNode = null
+        // While Hush records or transcribes, the ghost does not move, so the field is not read.
+        bubble.render(visible, machine.state, keyboard, if (visible && !busy) field?.let(::fieldOf) else null)
     }
+
+    private fun fieldOf(field: AccessibilityNodeInfo): SpotPicker.Field {
+        val bounds = Rect().also(field::getBoundsInScreen).toBox()
+        if (field != fieldNode || bounds != fieldBounds) {
+            fieldNode = field
+            fieldBounds = bounds
+            buttons = buttonsAround(field)
+        }
+        val cursor = if (SpotPicker.isTall(bounds, bubble.sizes)) cursorLine(field, bounds) else null
+        return SpotPicker.Field(bounds, cursor, buttons)
+    }
+
+    /** The bounds of the visible clickable and focusable views in the window of the field, other than the field. */
+    private fun buttonsAround(field: AccessibilityNodeInfo): List<SpotPicker.Box> {
+        val root = field.window?.root ?: return emptyList()
+        val found = ArrayList<SpotPicker.Box>()
+        val queue = ArrayDeque<AccessibilityNodeInfo>().apply { add(root) }
+        val rect = Rect()
+        var count = 0
+        while (queue.isNotEmpty() && count < MAX_NODES) {
+            val node = queue.removeFirst()
+            count++
+            if (!node.isVisibleToUser) continue
+            if (node != field && (node.isClickable || node.isLongClickable || node.isFocusable)) {
+                node.getBoundsInScreen(rect)
+                found += rect.toBox()
+            }
+            for (i in 0 until node.childCount) node.getChild(i)?.let(queue::add)
+        }
+        return found
+    }
+
+    /** The text line with the cursor, across the field, or null when the app does not tell where the cursor is. */
+    private fun cursorLine(field: AccessibilityNodeInfo, bounds: SpotPicker.Box): SpotPicker.Box? {
+        val text = if (field.isShowingHintText) "" else field.text ?: ""
+        if (text.isEmpty()) {
+            val line = (EMPTY_LINE_DP * resources.displayMetrics.density).toInt()
+            return bounds.copy(bottom = minOf(bounds.bottom, bounds.top + line))
+        }
+        val key = AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
+        if (key !in field.availableExtraData) return null
+        // The character after the cursor, or the last one when the cursor is at the end.
+        val index = field.textSelectionStart.let { if (it in 0 until text.length) it else text.length - 1 }
+        val args = Bundle().apply {
+            putInt(AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX, index)
+            putInt(AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH, 1)
+        }
+        if (!field.refreshWithExtraData(key, args)) return null
+        val char = field.extras.getParcelableArray(key, RectF::class.java)?.firstOrNull() ?: return null
+        return bounds.copy(top = floor(char.top).toInt(), bottom = ceil(char.bottom).toInt())
+    }
+
+    private fun Rect.toBox() = SpotPicker.Box(left, top, right, bottom)
 
     private fun onAction(action: Bubble.Action) {
         dispatch(
@@ -185,6 +251,10 @@ class HushService : AccessibilityService(), Recorder.Listener {
     private companion object {
         const val TAG = "Hush"
         const val REFRESH_DELAY_MS = 80L
+        // Enough for the views of a normal screen. Hush stops there to keep the walk short.
+        const val MAX_NODES = 500
+        // The height of the cursor line in an empty field.
+        const val EMPTY_LINE_DP = 48
         const val UNLOAD_DELAY_MS = 60_000L
     }
 }
