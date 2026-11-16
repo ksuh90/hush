@@ -1,0 +1,127 @@
+# Builds Hush.apk on a GitHub-hosted Linux machine.
+#
+# A pushed version tag (v1.2.3, the versionName in app/build.gradle.kts) attaches
+# Hush.apk to that tag's GitHub Release, creating the release if needed; the
+# README's Download link points at the newest one. A manual run only uploads the
+# APK as a workflow artifact, for testing.
+#
+# Signing: with the HUSH_KEYSTORE_BASE64, HUSH_KEYSTORE_PASSWORD, HUSH_KEY_ALIAS
+# and HUSH_KEY_PASSWORD secrets set (see the README), the APK is signed with the
+# same key as the installed one, so Android installs it as an update. Without
+# them the CI machine's debug key signs it, and the job log and release notes
+# say that it cannot update an installed Hush.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+
+      - name: Check the tag
+        if: github.ref_type == 'tag'
+        run: |
+          VERSION="$(sed -n 's/^ *versionName = "\(.*\)"$/\1/p' app/build.gradle.kts)"
+          if [ "$GITHUB_REF_NAME" != "v$VERSION" ]; then
+            echo "::error::the tag is $GITHUB_REF_NAME, but app/build.gradle.kts has versionName $VERSION"
+            exit 1
+          fi
+
+      # app/build.gradle.kts signs with the key in HUSH_KEYSTORE when it is set,
+      # and with the debug key when it is not.
+      - name: Import signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.HUSH_KEYSTORE_BASE64 }}
+          HUSH_KEYSTORE_PASSWORD: ${{ secrets.HUSH_KEYSTORE_PASSWORD }}
+          HUSH_KEY_ALIAS: ${{ secrets.HUSH_KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning title=Debug key::HUSH_KEYSTORE_BASE64 is not set, so the CI machine's debug key signs this APK. It cannot update an installed Hush: uninstall first, which deletes the downloaded models and settings."
+            echo "HUSH_SIGNING=debug" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          KEYSTORE="$RUNNER_TEMP/hush.keystore"
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$KEYSTORE"
+          CERT="$(keytool -list -v -keystore "$KEYSTORE" -storepass "$HUSH_KEYSTORE_PASSWORD" -alias "$HUSH_KEY_ALIAS" |
+            sed -n 's/^.*SHA256: *//p' | head -n 1 | tr -d ':' | tr 'A-F' 'a-f')"
+          if [ -z "$CERT" ]; then
+            echo "::error::keytool cannot read the key $HUSH_KEY_ALIAS from HUSH_KEYSTORE_BASE64 with HUSH_KEYSTORE_PASSWORD"
+            exit 1
+          fi
+          {
+            echo "HUSH_KEYSTORE=$KEYSTORE"
+            echo "HUSH_CERT=$CERT"
+            echo "HUSH_SIGNING=stable"
+          } >> "$GITHUB_ENV"
+
+      - name: Test and build Hush.apk
+        env:
+          HUSH_KEYSTORE_PASSWORD: ${{ secrets.HUSH_KEYSTORE_PASSWORD }}
+          HUSH_KEY_ALIAS: ${{ secrets.HUSH_KEY_ALIAS }}
+          HUSH_KEY_PASSWORD: ${{ secrets.HUSH_KEY_PASSWORD }}
+        run: |
+          # checkReleaseApk runs scripts/check-apk.sh: v1, v2 and v3 signatures,
+          # 16 KB alignment, minSdk 33 and arm64-v8a only.
+          ./gradlew testDebugUnitTest lintRelease checkReleaseApk
+          cp app/build/outputs/apk/release/app-release.apk Hush.apk
+
+      - name: Check signature
+        run: |
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)"
+          SIGNER="$("$APKSIGNER" verify --print-certs Hush.apk | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')"
+          echo "Signer certificate SHA-256: $SIGNER"
+          # A release that was meant to carry the Hush key must not ship with another one.
+          if [ "$HUSH_SIGNING" = stable ] && [ "$SIGNER" != "$HUSH_CERT" ]; then
+            echo "::error::the signing secrets are set, but the APK is signed with another key"
+            exit 1
+          fi
+
+      - name: Upload workflow artifact
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Hush.apk
+          path: Hush.apk
+          if-no-files-found: error
+
+      - name: Attach to GitHub Release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          NOTES="Download Hush.apk below and open it on the phone (Android 13 or later, arm64) to install or update Hush. The first time, Android asks to allow installs from the app that opened the file: tap Settings, turn on \"Allow from this source\", and go back."
+          if [ "$HUSH_SIGNING" = debug ]; then
+            WARNING="Warning: this APK is signed with the CI machine's debug key, not the Hush key. It cannot update an installed Hush, such as one from a local build (\"App not installed\"). To install it, uninstall Hush first, which deletes the downloaded models and settings."
+            NOTES="$NOTES"$'\n\n'"$WARNING"
+          fi
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            BODY="$(gh release view "$TAG" --json body --jq .body)"
+            if [ "$HUSH_SIGNING" = debug ] && ! grep -qF "$WARNING" <<< "$BODY"; then
+              gh release edit "$TAG" --notes "$BODY"$'\n\n'"$WARNING"
+            fi
+          else
+            gh release create "$TAG" --verify-tag --title "Hush $TAG" --notes "$NOTES"
+          fi
+          gh release upload "$TAG" Hush.apk --clobber
+
+      - name: Delete signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/hush.keystore"
