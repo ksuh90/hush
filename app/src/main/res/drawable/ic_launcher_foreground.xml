@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher icon: the Navy Gold logo (logo-ghost-colors-v5, card 2) on a 108 dp adaptive icon. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="0"
+        android:translateY="0">
+        <group
+            android:pivotX="54"
+            android:pivotY="58"
+            android:rotation="-8"
+            android:scaleX="0.92"
+            android:scaleY="0.92"
+            android:translateX="-2">
+            <path
+                android:fillColor="@color/gold"
+                android:pathData="M36,54 A18,18 0 0,1 72,54 V80 Q69,75.5 66,80 Q63,84.5 60,80 Q57,75.5 54,80 Q51,84.5 48,80 Q45,75.5 42,80 Q39,84.5 36,80 Z" />
+            <path
+                android:fillColor="@color/navy"
+                android:pathData="M43.6,54 a3.4,3.4 0 1,0 6.8,0 a3.4,3.4 0 1,0 -6.8,0 Z M57.6,54 a3.4,3.4 0 1,0 6.8,0 a3.4,3.4 0 1,0 -6.8,0 Z M51.2,64 a2.8,3.4 0 1,0 5.6,0 a2.8,3.4 0 1,0 -5.6,0 Z" />
+            <path
+                android:fillColor="@color/cheek"
+                android:pathData="M39.5,61 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 Z M62.5,61 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 Z" />
+        </group>
+        <path
+            android:pathData="M69,34 Q72,31 75,34 M73,41 Q75.5,38.5 78,41"
+            android:strokeColor="@color/cream"
+            android:strokeAlpha="0.9"
+            android:strokeLineCap="round"
+            android:strokeWidth="2.4" />
+    </group>
+</vector>

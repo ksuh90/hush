@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Hush.Base" parent="@android:style/Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.Hush" parent="Theme.Hush.Base">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="android:colorAccent">@color/link</item>
+        <item name="android:colorControlNormal">@color/field</item>
+        <item name="android:colorControlActivated">@color/link</item>
+        <item name="android:textColorPrimary">@color/fg</item>
+        <item name="android:textColorSecondary">@color/mute</item>
+        <item name="android:textColorHint">@color/mute</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">@bool/light_bars</item>
+        <item name="android:windowLightNavigationBar">@bool/light_bars</item>
+        <item name="android:alertDialogTheme">@style/Theme.Hush.Dialog</item>
+    </style>
+
+    <style name="Theme.Hush.Dialog.Base" parent="@android:style/Theme.Material.Light.Dialog.Alert" />
+
+    <style name="Theme.Hush.Dialog" parent="Theme.Hush.Dialog.Base">
+        <item name="android:colorBackground">@color/card</item>
+        <item name="android:colorAccent">@color/link</item>
+        <item name="android:textColorPrimary">@color/fg</item>
+        <item name="android:textColorSecondary">@color/mute</item>
+    </style>
+</resources>

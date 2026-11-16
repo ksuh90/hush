@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Hush.Text" parent="">
+        <item name="android:fontFamily">@font/inter</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:textColor">@color/fg</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="Hush.Title" parent="Hush.Text">
+        <item name="android:fontFamily">@font/fredoka_semibold</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:lineHeight">32sp</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:paddingHorizontal">24dp</item>
+    </style>
+
+    <style name="Hush.AppBarTitle" parent="Hush.Text">
+        <item name="android:fontFamily">@font/fredoka_semibold</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <style name="Hush.Lead" parent="Hush.Text">
+        <item name="android:lineHeight">23sp</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:paddingHorizontal">28dp</item>
+        <item name="android:paddingTop">10dp</item>
+    </style>
+
+    <style name="Hush.Lead.Sub">
+        <item name="android:textColor">@color/mute</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineHeight">22sp</item>
+    </style>
+
+    <style name="Hush.Note" parent="Hush.Text">
+        <item name="android:textColor">@color/mute</item>
+        <item name="android:textSize">13.5sp</item>
+        <item name="android:lineHeight">19.5sp</item>
+        <item name="android:background">@drawable/bg_note</item>
+        <item name="android:paddingHorizontal">14dp</item>
+        <item name="android:paddingVertical">12dp</item>
+        <item name="android:layout_marginHorizontal">20dp</item>
+        <item name="android:layout_marginTop">16dp</item>
+    </style>
+
+    <style name="Hush.Small" parent="Hush.Text">
+        <item name="android:textColor">@color/mute</item>
+        <item name="android:textSize">13.5sp</item>
+        <item name="android:lineHeight">19sp</item>
+    </style>
+
+    <!-- A short message about a refused action, under the control that refused it. -->
+    <style name="Hush.FieldNote" parent="Hush.Small">
+        <item name="android:textColor">@color/danger</item>
+    </style>
+
+    <!-- The privacy lines under About: body color, so they read as facts, not as a hint. -->
+    <style name="Hush.About" parent="Hush.Text">
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineHeight">21sp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:breakStrategy">balanced</item>
+    </style>
+
+    <style name="Hush.Strong" parent="Hush.Text">
+        <item name="android:textFontWeight">600</item>
+    </style>
+
+    <style name="Hush.StepLabel" parent="Hush.Text">
+        <item name="android:textColor">@color/mute</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="Hush.Section" parent="Hush.Text">
+        <item name="android:textColor">@color/mute</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:letterSpacing">0.015</item>
+        <item name="android:paddingHorizontal">20dp</item>
+        <item name="android:paddingTop">18dp</item>
+        <item name="android:paddingBottom">6dp</item>
+        <item name="android:accessibilityHeading">true</item>
+    </style>
+
+    <style name="Hush.Progress" parent="Hush.Text">
+        <item name="android:textColor">@color/mute</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+
+    <style name="Hush.BigButton" parent="Hush.Text">
+        <item name="android:background">@drawable/bg_button</item>
+        <item name="android:textColor">@color/btn_fg</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:gravity">center</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:paddingHorizontal">20dp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="Hush.TextButton" parent="Hush.Text">
+        <item name="android:background">@drawable/bg_text_button</item>
+        <item name="android:textColor">@color/link</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:gravity">center</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:paddingHorizontal">12dp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="Hush.IconButton" parent="">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">@drawable/bg_round_button</item>
+        <item name="android:scaleType">center</item>
+    </style>
+
+    <!-- A text field: a white card with a field edge. Disabled, it has a flat fill and mute text. -->
+    <style name="Hush.Input" parent="Hush.Text">
+        <item name="android:background">@drawable/bg_input</item>
+        <item name="android:textColor">@color/text_field</item>
+        <item name="android:textColorHint">@color/mute</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:paddingHorizontal">18dp</item>
+        <item name="android:paddingVertical">12dp</item>
+    </style>
+
+    <!-- The banner that tells why a section is off: the info icon and the text, with a text button under it. -->
+    <style name="Hush.Warn" parent="">
+        <item name="android:background">@drawable/bg_warn</item>
+        <item name="android:layout_marginHorizontal">20dp</item>
+        <item name="android:paddingHorizontal">14dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Hush.WarnText" parent="Hush.Text">
+        <item name="android:textColor">@color/warn_fg</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineHeight">21sp</item>
+    </style>
+
+    <style name="Hush.WarnSub" parent="Hush.Text">
+        <item name="android:textColor">@color/warn_fg</item>
+        <item name="android:textSize">13.5sp</item>
+        <item name="android:lineHeight">19sp</item>
+    </style>
+</resources>

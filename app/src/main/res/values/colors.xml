@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Navy Gold logo colors. They do not change in dark mode. -->
+    <color name="navy">#FF0F1A3A</color>
+    <color name="gold">#FFFFC23D</color>
+    <color name="cream">#FFFFF1DC</color>
+    <color name="cheek">#FFE8743B</color>
+    <!-- The bubble discs: cream, and gold 30% over cream for the check. They are 70% opaque (B3),
+         so the text under the bubble shows through. -->
+    <color name="bubble_disc">#B3FFF1DC</color>
+    <color name="bubble_check">#B3FFE3AC</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Screen colors, light mode ("Cream and navy"). values-night has the dark mode values. -->
+    <color name="bg">#FFFFFAF0</color>
+    <color name="fg">#FF0F1A3A</color>
+    <color name="mute">#FF525A78</color>
+    <color name="card">#FFFFFFFF</color>
+    <color name="line">#FFEFE6D2</color>
+    <color name="field">#FF8A90A8</color>
+    <color name="btn">#FF0F1A3A</color>
+    <color name="btn_fg">#FFFFF1DC</color>
+    <color name="seg">#FF0F1A3A</color>
+    <color name="trk">#FFE9E1CF</color>
+    <color name="disc">#FF0F1A3A</color>
+    <color name="link">#FF0F1A3A</color>
+    <color name="danger">#FFB3261E</color>
+    <color name="ripple">#1F0F1A3A</color>
+
+    <!-- The floating card of the setup buttons: its edge, and the clear end of the fade above it. -->
+    <color name="card_edge">#FFE3D8BF</color>
+    <color name="bg_clear">#00FFFAF0</color>
+
+    <!-- My words. The "Parakeet model only" banner: gold tint, gold edge, navy text. A disabled field or chip has a
+         flat fill and no edge. Its text keeps the mute color, so it stays readable (5.8:1). -->
+    <color name="warn_bg">#FFFFEDC2</color>
+    <color name="warn_line">#FFFFC23D</color>
+    <color name="warn_fg">#FF0F1A3A</color>
+    <color name="off_fill">#FFF3ECDD</color>
+    <color name="chip">#FFFFF1DC</color>
+</resources>

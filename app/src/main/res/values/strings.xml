@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hush</string>
+    <string name="service_label">Hush voice typing</string>
+    <string name="service_summary">Shows the Hush ghost on text fields. Speech stays on this phone.</string>
+    <string name="service_description">Hush shows a small ghost button when you edit a text field. Tap the ghost and speak. Tap the check mark to put the text at the cursor, or tap X to stop. Hush finds the focused text field and types the text into it. Speech recognition runs on this phone. Hush does not send audio or text to a server.</string>
+
+    <string name="step_of">Step %1$d of 4</string>
+    <string name="title_mic">Microphone</string>
+    <string name="title_language">Language and speech model</string>
+    <string name="title_accessibility">Accessibility service</string>
+    <string name="title_battery">Battery</string>
+    <string name="title_ready">Hush is ready</string>
+    <string name="title_settings">Settings</string>
+    <string name="title_diagnostics">Diagnostics</string>
+
+    <string name="lead_mic">Hush listens only after you tap the ghost. Speech stays on this phone.</string>
+    <string name="lead_accessibility">Go to Installed apps &gt; Hush voice typing and turn it on.</string>
+    <string name="note_accessibility">If Android shows “Restricted setting”: tap “Open apps”, tap Hush, tap ⋮ (top right), tap “Allow restricted settings”, and try again.</string>
+    <string name="lead_battery">In app info, set Battery to Unrestricted.</string>
+    <string name="note_battery">On a Samsung phone, also go to Settings &gt; Battery &gt; Background usage limits and add Hush to “Never sleeping apps”.</string>
+    <string name="model_hint">Hush downloads the model one time. After that, Hush uses no network. Hush keeps one model for each language: when a new model is downloaded, Hush deletes the old one.</string>
+    <string name="try_hint">Tap here. The Hush ghost shows next to this field.</string>
+
+    <string name="option_note">%1$s, %2$d\u00A0MB</string>
+    <string name="model_summary">%1$s\u00A0·\u00A0%2$d\u00A0MB</string>
+    <string name="language_summary">%1$s · %2$s\u00A0·\u00A0%3$d\u00A0MB</string>
+    <string name="status_model_downloading">Downloading: %1$d%% of %2$d\u00A0MB</string>
+    <string name="status_model_failed">Download stopped: %1$s</string>
+
+    <string name="action_allow">Allow</string>
+    <string name="action_download">Download (%1$d\u00A0MB)</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_open_accessibility">Open accessibility</string>
+    <string name="action_open_apps">Open apps</string>
+    <string name="action_app_info">Open app info</string>
+    <string name="action_skip">Skip</string>
+    <string name="action_change">Change</string>
+    <string name="action_more">More options</string>
+    <string name="action_back">Back</string>
+    <string name="action_delete">Delete</string>
+
+    <string name="settings_speech">Speech</string>
+    <string name="settings_help">Help</string>
+    <string name="settings_about">About</string>
+    <string name="delete_model">Delete model</string>
+    <string name="delete_summary">Frees %1$d\u00A0MB. Hush downloads it again when you need it.</string>
+    <string name="delete_none">The speech model is not on this phone.</string>
+    <string name="delete_confirm_title">Delete the speech model?</string>
+    <string name="delete_confirm_text">Hush cannot type until you download the model again (%1$d\u00A0MB).</string>
+    <string name="diagnostics_summary">Microphone, engine and typing notes</string>
+    <string name="diagnostics_hint">The last results of the microphone, the speech engine and typing. Send them when you report a problem.</string>
+    <string name="about_version">Hush %1$s</string>
+    <string name="about_on_phone">Everything happens on this phone. Hush sends no audio and no text.</string>
+    <string name="about_keeps">Hush keeps no recordings and no text. If an app blocks typing, the text goes to the clipboard.</string>
+    <string name="about_internet">Hush uses the internet only to download the speech model.</string>
+
+    <string name="channel_recording">Recording</string>
+    <string name="notification_listening">Hush is listening</string>
+
+    <string name="bubble_start">Start voice typing</string>
+    <string name="bubble_stop">Stop and type the text</string>
+    <string name="bubble_cancel">Cancel voice typing</string>
+    <string name="bubble_confirm">Type the text</string>
+
+    <string name="notice_no_model">Download the speech model in Hush first.</string>
+    <string name="notice_no_speech">Hush heard no speech.</string>
+    <string name="notice_mic_failed">Hush cannot start the microphone.</string>
+    <string name="notice_mic_silent">The microphone gave no sound. Another app can use it, or Android blocks it.</string>
+    <string name="notice_engine_failed">Hush cannot use the speech model. Download it again.</string>
+    <string name="notice_copied">Hush cannot type in this field. The text is on the clipboard. Paste it.</string>
+
+    <string name="diag_none">No data yet.</string>
+    <string name="settings_words">My words</string>
+    <string name="words_explain">Hush spells these words your way. Use names and terms, not sentences. Type them with commas between.</string>
+    <string name="words_explain_empty">No words yet. Hush spells these words your way. Use names and terms, not sentences. Type them with commas between.</string>
+    <string name="words_hint">Add words</string>
+    <string name="words_add">Add the words</string>
+    <string name="words_remove">Remove %1$s</string>
+    <string name="words_only">Parakeet model only</string>
+    <string name="words_cannot">%1$s cannot use your words.</string>
+    <plurals name="words_show_all">
+        <item quantity="one">Show all %1$d word</item>
+        <item quantity="other">Show all %1$d words</item>
+    </plurals>
+    <string name="words_show_less">Show less</string>
+    <string name="words_count">%1$d of %2$d</string>
+    <plurals name="words_count_description">
+        <item quantity="one">%1$d of %2$d word</item>
+        <item quantity="other">%1$d of %2$d words</item>
+    </plurals>
+    <plurals name="words_full">
+        <item quantity="one">Your list is full (%1$d word). Remove a word to add a new one.</item>
+        <item quantity="other">Your list is full (%1$d words). Remove a word to add a new one.</item>
+    </plurals>
+    <plurals name="words_not_added">
+        <item quantity="one">%1$d word was not added.</item>
+        <item quantity="other">%1$d words were not added.</item>
+    </plurals>
+    <plurals name="words_too_long">
+        <item quantity="one">“%1$s” is too long. Use up to %2$d word and %3$d characters.</item>
+        <item quantity="other">“%1$s” is too long. Use up to %2$d words and %3$d characters.</item>
+    </plurals>
+    <plurals name="words_too_long_many">
+        <item quantity="one">%1$d entry is too long. Use up to %2$d words and %3$d characters in each.</item>
+        <item quantity="other">%1$d entries are too long. Use up to %2$d words and %3$d characters in each.</item>
+    </plurals>
+    <plurals name="words_removed">
+        <item quantity="one">Hush removed %1$d word from your list. The list now holds up to %2$d words, with up to %3$d words and %4$d characters in each.</item>
+        <item quantity="other">Hush removed %1$d words from your list. The list now holds up to %2$d words, with up to %3$d words and %4$d characters in each.</item>
+    </plurals>
+    <string name="action_change_model">Change model</string>
+</resources>

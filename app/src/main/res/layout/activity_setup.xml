@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One layout for the setup steps, the ready screen and the language page. SetupActivity shows the parts for each. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <include
+        layout="@layout/app_bar"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/stepBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="48dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="12dp">
+
+        <LinearLayout
+            android:id="@+id/segments"
+            android:layout_width="0dp"
+            android:layout_height="6dp"
+            android:layout_weight="1"
+            android:importantForAccessibility="no"
+            android:orientation="horizontal"
+            tools:ignore="NestedWeights">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/stepLabel"
+            style="@style/Hush.StepLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/menuBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="4dp"
+        android:paddingTop="4dp"
+        android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/menuButton"
+            style="@style/Hush.IconButton"
+            android:layout_gravity="end"
+            android:contentDescription="@string/action_more"
+            android:src="@drawable/ic_more" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="12dp">
+
+                <FrameLayout
+                    android:id="@+id/disc"
+                    android:layout_width="140dp"
+                    android:layout_height="140dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="24dp"
+                    android:background="@drawable/bg_disc">
+
+                    <ImageView
+                        android:id="@+id/ghost"
+                        android:layout_width="84dp"
+                        android:layout_height="96dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ghost" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/title"
+                    style="@style/Hush.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:accessibilityHeading="true" />
+
+                <TextView
+                    android:id="@+id/lead"
+                    style="@style/Hush.Lead"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/summary"
+                    style="@style/Hush.Lead.Sub"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/service_summary" />
+
+                <RadioGroup
+                    android:id="@+id/languageGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="16dp" />
+
+                <TextView
+                    android:id="@+id/note"
+                    style="@style/Hush.Note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <LinearLayout
+                    android:id="@+id/languageCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_card"
+                    android:gravity="center_vertical"
+                    android:minHeight="64dp"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="8dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/languageName"
+                            style="@style/Hush.Strong"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/languageModel"
+                            style="@style/Hush.Small"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/changeButton"
+                        style="@style/Hush.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/action_change"
+                        android:textSize="14.5sp" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/testField"
+                    style="@style/Hush.Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_field"
+                    android:gravity="center_vertical|start"
+                    android:hint="@string/try_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:lineHeight="21sp"
+                    android:minHeight="96dp"
+                    android:padding="16dp"
+                    android:textColorHint="@color/mute"
+                    android:textSize="15sp" />
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Above the floating card: the text that scrolls under the card fades out. -->
+        <View
+            android:id="@+id/fade"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/bg_fade"
+            android:importantForAccessibility="no"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:outlineAmbientShadowColor="@color/navy"
+        android:outlineSpotShadowColor="@color/navy"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:id="@+id/progressText"
+            style="@style/Hush.Progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:accessibilityLiveRegion="polite" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@android:style/Widget.Material.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginBottom="8dp"
+            android:max="1000"
+            android:maxHeight="8dp"
+            android:minHeight="8dp"
+            android:progressDrawable="@drawable/progress" />
+
+        <Button
+            android:id="@+id/mainButton"
+            style="@style/Hush.BigButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/secondButton"
+            style="@style/Hush.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
+</LinearLayout>

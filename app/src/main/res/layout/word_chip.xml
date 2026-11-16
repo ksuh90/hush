@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One of the user's words, with an X that removes it. The chip is 40 dp high in a 48 dp touch row. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_chip"
+    android:gravity="center_vertical"
+    android:minHeight="48dp"
+    android:orientation="horizontal"
+    android:paddingStart="16dp"
+    tools:ignore="RtlSymmetry">
+
+    <TextView
+        android:id="@+id/word"
+        style="@style/Hush.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_field"
+        android:textSize="15sp" />
+
+    <ImageButton
+        android:id="@+id/remove"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_round_button"
+        android:src="@drawable/ic_x_small"
+        tools:ignore="ContentDescription" />
+</LinearLayout>

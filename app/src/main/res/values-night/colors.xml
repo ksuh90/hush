@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#FF0F1A3A</color>
+    <color name="fg">#FFFFF1DC</color>
+    <color name="mute">#FFAEB6D3</color>
+    <color name="card">#FF1A2652</color>
+    <color name="line">#FF26325F</color>
+    <color name="field">#FF6B76A0</color>
+    <color name="btn">#FFFFC23D</color>
+    <color name="btn_fg">#FF0F1A3A</color>
+    <color name="seg">#FFFFC23D</color>
+    <color name="trk">#FF26325F</color>
+    <color name="disc">#FF1A2652</color>
+    <color name="link">#FFFFC23D</color>
+    <color name="danger">#FFFFB4AB</color>
+    <color name="ripple">#29FFF1DC</color>
+    <color name="card_edge">#FF34407A</color>
+    <color name="bg_clear">#000F1A3A</color>
+    <color name="warn_bg">#FF3B3A44</color>
+    <color name="warn_line">#FFFFC23D</color>
+    <color name="warn_fg">#FFFFF1DC</color>
+    <color name="off_fill">#FF16214A</color>
+    <color name="chip">#FF1A2652</color>
+</resources>
