@@ -15,13 +15,26 @@ android {
         ndk { abiFilters += "arm64-v8a" }
     }
 
+    signingConfigs {
+        // The release workflow sets HUSH_KEYSTORE from repository secrets, so its APK has the same
+        // signature as the installed one and installs as an update (see .github/workflows/release.yml).
+        providers.environmentVariable("HUSH_KEYSTORE").orNull?.let { keystore ->
+            create("hush") {
+                storeFile = file(keystore)
+                storePassword = providers.environmentVariable("HUSH_KEYSTORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("HUSH_KEY_ALIAS").get()
+                keyPassword = providers.environmentVariable("HUSH_KEY_PASSWORD").get()
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Hush is installed by hand, so the debug key signs the release build.
-            signingConfig = signingConfigs.getByName("debug")
+            // Hush is installed by hand, so without HUSH_KEYSTORE the debug key signs the release build.
+            signingConfig = signingConfigs.findByName("hush") ?: signingConfigs.getByName("debug")
         }
     }
 
