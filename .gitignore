@@ -5,3 +5,13 @@ local.properties
 .idea/
 *.iml
 .DS_Store
+.cxx/
+.externalNativeBuild/
+captures/
+.vscode/
+*.apk
+*.aab
+*.jks
+*.keystore
+*.p12
+*.pfx
