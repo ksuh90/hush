@@ -84,7 +84,10 @@ jobs:
       - name: Check signature
         run: |
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)"
-          SIGNER="$("$APKSIGNER" verify --print-certs Hush.apk | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')"
+          CERTS="$("$APKSIGNER" verify --print-certs Hush.apk)"
+          # apksigner 36 prints "Signer #1 certificate SHA-256 digest: ...", 37 prints
+          # "V3.0 Signer: certificate SHA-256 digest: ...". Two keys give two lines, so no match.
+          SIGNER="$(sed -n 's/^.* certificate SHA-256 digest: //p' <<< "$CERTS" | sort -u)"
           echo "Signer certificate SHA-256: $SIGNER"
           # A release that was meant to carry the Hush key must not ship with another one.
           if [ "$HUSH_SIGNING" = stable ] && [ "$SIGNER" != "$HUSH_CERT" ]; then
