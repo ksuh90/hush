@@ -6,10 +6,10 @@
 # APK as a workflow artifact, for testing.
 #
 # Signing: with the HUSH_KEYSTORE_BASE64, HUSH_KEYSTORE_PASSWORD, HUSH_KEY_ALIAS
-# and HUSH_KEY_PASSWORD secrets set (see the README), the APK is signed with the
-# same key as the installed one, so Android installs it as an update. Without
-# them the CI machine's debug key signs it, and the job log and release notes
-# say that it cannot update an installed Hush.
+# and HUSH_KEY_PASSWORD secrets set, the APK is signed with the same key as the
+# installed one, so Android installs it as an update. Without them the CI
+# machine's debug key signs it, and the job log and release notes say that it
+# cannot update an installed Hush.
 name: Release
 
 on:

@@ -17,7 +17,7 @@ android {
 
     signingConfigs {
         // The release workflow sets HUSH_KEYSTORE from repository secrets, so its APK has the same
-        // signature as the installed one and installs as an update (see the README).
+        // signature as the installed one and installs as an update (see .github/workflows/release.yml).
         providers.environmentVariable("HUSH_KEYSTORE").orNull?.let { keystore ->
             create("hush") {
                 storeFile = file(keystore)
