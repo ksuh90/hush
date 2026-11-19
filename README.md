@@ -34,7 +34,7 @@ Hush downloads the model for your language one time.
 | English (faster) | Moonshine Base | 142 MB | MIT |
 | Korean | Whisper Base | 161 MB | MIT |
 
-My words works with Parakeet only.
+The "My words" list works with Parakeet only.
 
 ## Privacy
 
