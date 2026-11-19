@@ -46,7 +46,7 @@ class ModelStore(private val root: File) {
     }
 
     /** Deletes the models that [Catalog.keep] does not keep for the chosen language. */
-    fun prune(context: Context) = prune(Catalog.keep(Prefs(context).language, ::isReady))
+    fun prune(context: Context) = prune(Catalog.keep(Prefs(context).language, ready = ::isReady))
 
     companion object {
         private const val BPE_VOCAB = "bpe.vocab"

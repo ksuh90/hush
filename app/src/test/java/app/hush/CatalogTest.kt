@@ -32,7 +32,14 @@ class CatalogTest {
     }
 
     @Test
-    fun onlyParakeetTakesTheUsersWords() {
+    fun spanishAndFrenchShareOneModel() {
+        assertEquals(Catalog.parakeetV3, Catalog.language("es").model)
+        assertEquals(Catalog.parakeetV3, Catalog.language("fr").model)
+        assertEquals(1, Catalog.models.count { it == Catalog.parakeetV3 })
+    }
+
+    @Test
+    fun onlyParakeetV2TakesTheUsersWords() {
         assertEquals(listOf(Catalog.parakeetV2), Catalog.models.filter { it.takesWords })
     }
 
@@ -49,9 +56,9 @@ class CatalogTest {
     fun readyChoiceDropsTheOtherModelOfItsLanguage() {
         val moonshine = Catalog.language("en", Catalog.moonshineBaseEn.id)
         val keep = Catalog.keep(moonshine) { true }
-        assertEquals(setOf(Catalog.moonshineBaseEn, Catalog.whisperBase), keep)
+        assertEquals(setOf(Catalog.moonshineBaseEn, Catalog.whisperBase, Catalog.parakeetV3), keep)
         val parakeet = Catalog.language("en")
-        assertEquals(setOf(Catalog.parakeetV2, Catalog.whisperBase), Catalog.keep(parakeet) { true })
+        assertEquals(setOf(Catalog.parakeetV2, Catalog.whisperBase, Catalog.parakeetV3), Catalog.keep(parakeet) { true })
     }
 
     @Test
@@ -68,10 +75,29 @@ class CatalogTest {
     }
 
     @Test
+    fun sharedModelStaysForBothLanguages() {
+        for (code in listOf("es", "fr")) {
+            assertEquals(code, Catalog.models.toSet(), Catalog.keep(Catalog.language(code)) { true })
+        }
+    }
+
+    @Test
+    fun otherModelOfALanguageGoesOnlyWhenNoOtherLanguageUsesIt() {
+        // A second Spanish model: when it is ready, Parakeet v3 must stay, because French uses it.
+        val whisper = Language("es", "Español (Spanish)", "Whisper Base", Catalog.whisperBase, "es")
+        val all = Catalog.languages + whisper
+        assertEquals(Catalog.models.toSet(), Catalog.keep(whisper, all) { true })
+        // Without the French entry, Parakeet v3 goes.
+        val noFrench = all.filter { it.code != "fr" }
+        assertEquals(Catalog.models.toSet() - Catalog.parakeetV3, Catalog.keep(whisper, noFrench) { true })
+    }
+
+    @Test
     fun englishIsTheDefault() {
         assertEquals("en", Catalog.languages.first().code)
         assertEquals("en", Catalog.language("xx").code)
         assertEquals("ko", Catalog.language("ko").code)
+        assertEquals("fr", Catalog.language("fr", Catalog.parakeetV2.id).code)
     }
 
     @Test

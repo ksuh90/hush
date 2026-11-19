@@ -77,7 +77,7 @@
     <string name="words_hint">Add words</string>
     <string name="words_add">Add the words</string>
     <string name="words_remove">Remove %1$s</string>
-    <string name="words_only">Parakeet model only</string>
+    <string name="words_only">Parakeet v2 only</string>
     <string name="words_cannot">%1$s cannot use your words.</string>
     <plurals name="words_show_all">
         <item quantity="one">Show all %1$d word</item>

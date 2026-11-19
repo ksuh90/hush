@@ -73,6 +73,35 @@ object Catalog {
         takesWords = true,
     )
 
+    private const val PARAKEET_V3_URL =
+        "https://huggingface.co/csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8/resolve/ed5d745623472f97cfc2e6c2916ee248798fc5a8"
+
+    /** One model for 25 European languages. It finds the spoken language itself: the engine gives it no language code. */
+    val parakeetV3 = ModelSpec(
+        id = "parakeet-tdt-0.6b-v3-int8",
+        name = "Parakeet v3",
+        family = Family.TRANSDUCER,
+        encoder = ModelFile(
+            "encoder.int8.onnx", "$PARAKEET_V3_URL/encoder.int8.onnx",
+            "1afbe69c1ffdabee94755f42e4daf1d93549131a3da11356bda84fcef0f2c479", 652_282_294,
+        ),
+        decoder = ModelFile(
+            "decoder.int8.onnx", "$PARAKEET_V3_URL/decoder.int8.onnx",
+            "0222a86147299d4dee90edf95b6d13827edb42ad8b7c9cf0b2582f030937c0b5", 11_845_274,
+        ),
+        joiner = ModelFile(
+            "joiner.int8.onnx", "$PARAKEET_V3_URL/joiner.int8.onnx",
+            "cbd02f3696e9944970111fb439d9c3fd365a80374565f13f2b9c7007d253fc98", 6_355_277,
+        ),
+        tokens = ModelFile(
+            "tokens.txt", "$PARAKEET_V3_URL/tokens.txt",
+            "d58544679ea4bc6ac563d1f545eb7d474bd6cfa467f0a6e2c1dc1c7d37e3c35d", 93_939,
+        ),
+        maxChunkSeconds = 20,
+        // My words stays off. With the words, the beam search of sherpa-onnx 2.0.1 dropped spoken words next to a
+        // listed word in Spanish and French tests. Parakeet v2 did not drop words in the same English test.
+    )
+
     private const val MOONSHINE_BASE_EN_URL =
         "https://huggingface.co/csukuangfj2/sherpa-onnx-moonshine-base-en-quantized-2026-02-27/resolve/8f4d6c58c03d40bcea40043bb7120a878f2bbef6"
 
@@ -122,6 +151,8 @@ object Catalog {
         Language("en", "English", "Parakeet v2, high accuracy", parakeetV2),
         Language("en", "English", "Moonshine Base, fast", moonshineBaseEn),
         Language("ko", "한국어 (Korean)", "Whisper Base, slower, basic accuracy", whisperBase),
+        Language("es", "Español (Spanish)", "Parakeet v3, high accuracy, the same model as French", parakeetV3),
+        Language("fr", "Français (French)", "Parakeet v3, high accuracy, the same model as Spanish", parakeetV3),
     )
 
     val models get() = languages.map { it.model }.distinct()
@@ -134,10 +165,12 @@ object Catalog {
 
     /**
      * The models to keep on the phone. Hush keeps one model for each language: when the [chosen] model is ready,
-     * the other models of that language go. Until then the old model stays, so the user can go back to it.
+     * the other models of that language go. Until then the old model stays, so the user can go back to it. A model
+     * that other languages also use always stays.
      */
-    fun keep(chosen: Language, ready: (ModelSpec) -> Boolean): Set<ModelSpec> {
-        val drop = if (ready(chosen.model)) languages.filter { it.code == chosen.code }.map { it.model } - chosen.model else emptyList()
-        return models.toSet() - drop.toSet()
+    fun keep(chosen: Language, all: List<Language> = languages, ready: (ModelSpec) -> Boolean): Set<ModelSpec> {
+        val (same, other) = all.partition { it.code == chosen.code }
+        val drop = if (ready(chosen.model)) same.map { it.model } - chosen.model - other.map { it.model }.toSet() else emptyList()
+        return all.map { it.model }.toSet() - drop.toSet()
     }
 }
