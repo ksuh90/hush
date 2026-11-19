@@ -16,7 +16,7 @@ Private voice typing for Android. Speak in any app, and Hush types it for you. S
 - Tap the ghost and speak. Tap the check to put the text at the cursor, or X to cancel.
 - Everything runs on the phone with [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx). No account, no server.
 - My words: add names and terms, such as PostgreSQL or Kubernetes, and Hush spells them your way.
-- English and Korean.
+- English, Korean, Spanish and French.
 
 ## Download
 
@@ -26,15 +26,16 @@ Open the APK to install it, then open Hush and follow the setup steps. If Androi
 
 ## Models
 
-Hush downloads the model for your language one time.
+Hush downloads the model for your language one time. Spanish and French use the same model, so Hush downloads it only one time for the two languages.
 
 | Language | Model | Size | License |
 | --- | --- | --- | --- |
 | English | NVIDIA Parakeet TDT 0.6B v2 | 662 MB | CC-BY-4.0 |
 | English (faster) | Moonshine Base | 142 MB | MIT |
 | Korean | Whisper Base | 161 MB | MIT |
+| Spanish, French | NVIDIA Parakeet TDT 0.6B v3 | 671 MB | CC-BY-4.0 |
 
-The "My words" list works with Parakeet only.
+The "My words" list works with Parakeet v2 (English) only.
 
 ## Privacy
 

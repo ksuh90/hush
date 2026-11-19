@@ -130,8 +130,24 @@ class DownloaderTest {
                 java.io.RandomAccessFile(place, "rw").use { it.setLength(file.bytes) }
             }
         }
-        store.prune(Catalog.keep(Catalog.language("en", Catalog.moonshineBaseEn.id), store::isReady))
+        store.prune(Catalog.keep(Catalog.language("en", Catalog.moonshineBaseEn.id), ready = store::isReady))
         assertTrue(store.isReady(Catalog.moonshineBaseEn))
         assertFalse(File(temp.root, Catalog.parakeetV2.id).exists())
+    }
+
+    @Test
+    fun spanishAndFrenchUseTheSameFiles() {
+        val store = ModelStore(temp.root)
+        val spanish = Catalog.language("es")
+        val french = Catalog.language("fr")
+        assertEquals(store.parts(spanish.model), store.parts(french.model))
+        for ((file, place) in store.parts(spanish.model)) {
+            place.parentFile!!.mkdirs()
+            java.io.RandomAccessFile(place, "rw").use { it.setLength(file.bytes) }
+        }
+        // After the Spanish download, French needs no download, and a prune for French keeps the files.
+        assertTrue(store.isReady(french.model))
+        store.prune(Catalog.keep(french, ready = store::isReady))
+        assertTrue(store.isReady(spanish.model))
     }
 }
